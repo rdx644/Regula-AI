@@ -2,6 +2,14 @@
 
 The application is a modular monolith with a separate background worker. This diagram represents the inspected code. Planned investigation/chat, OCR and autonomous regulatory discovery are not implemented product capabilities.
 
+## Source-backed interactive diagram
+
+![RegulaAI application architecture](docs/assets/regulaai-architecture.svg)
+
+[Download the interactive HTML](.archify/architecture-regulaai-20261010-035812/regulaai.html) and open it in a browser for source links, light/dark themes and export controls. The Archify specification pins source revision `9e0ca676c6432321e6ae8003e4c81ec9884960d3`. All four delivery gates pass, with browser checks and light/dark visual review recorded in [diagram evidence](docs/evidence/architecture-diagram.json).
+
+## System overview
+
 ```mermaid
 flowchart LR
     U[Compliance reviewer] --> W[Next.js: intake, matrix, control/evidence review]
@@ -59,6 +67,6 @@ The browser test replaces only extraction model calls with an explicit synthetic
 
 ## Deployment status and limits
 
-Dockerfiles and a provider-neutral Compose template exist. No release image, staging account, TLS ingress, cloud IAM, managed backups or alert delivery has been verified. See `docs/OPERATIONS.md`.
+Dockerfiles, a provider-neutral Compose template and a Render preview blueprint exist. GitHub CI and Render Blueprint CI passed at source revision `9e0ca67`. The owner will approve plans and secrets in Render before creating services. No release image, live staging service, TLS ingress, cloud IAM, managed backups or alert delivery has been verified. See [Render deployment](docs/RENDER_DEPLOYMENT.md) and [operations](docs/OPERATIONS.md).
 
 Vector storage is currently version-level. Local keyword retrieval works; obligation-level embedding ingestion and calibrated hybrid reranking remain incomplete. Version change/impact, cross-regulation and contradiction agents exist but have no scored real model run. Policy extraction has not completed a real model/multi-page demonstration. Investigation/planning tool selection and its product interface remain missing. Do not present those planned paths as verified features.

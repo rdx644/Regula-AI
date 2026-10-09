@@ -4,6 +4,8 @@ Date: 2026-10-10. **Submission gate: incomplete. Production gate: blocked.**
 
 The local engineering work is reviewable and the synthetic browser workflow is reproducible. The owner's instruction keeps evaluation unpaid until a budget is supplied. The owner subsequently authorized GitHub publication and Render blueprint preparation, selecting **prepare/push only; approve plans and secrets in Render**. See [Render setup](RENDER_DEPLOYMENT.md). Staging deployment remains unverified; do not present the remaining gates as passed.
 
+Publication update: source revision `9e0ca67` is pushed to GitHub. [Main CI](https://github.com/rdx644/Regula-AI/actions/runs/37998241134) and [Render Blueprint CI](https://github.com/rdx644/Regula-AI/actions/runs/37998241179) passed. The README includes a source-backed Archify diagram with [verification evidence](evidence/architecture-diagram.json).
+
 ## Verified local evidence
 
 - 104 backend tests passed against PostgreSQL/Redis: unit, tenant/IDOR, review, session revocation, queue recovery, provenance, quota, schema safety, S3 emulator and persisted simulation checks. Final run: 54.78 seconds; 27 dependency/framework deprecation warnings.
@@ -42,7 +44,7 @@ Three additive migrations follow the previous `b2c3d4e5f6a7` head. Review every 
 
 | Slice | Status | Code / evidence / unresolved scope |
 |---|---|---|
-| 1 Foundation | Partial | Auth, RBAC, PostgreSQL migrations, queue and health tested; remote CI not observed. |
+| 1 Foundation | Partial | Auth, RBAC, PostgreSQL migrations, queue and health tested; remote CI passed at `9e0ca67`. Deployed infrastructure remains unverified. |
 | 2 Regulation ingestion | Verified locally | Private upload, parser/worker, library and metadata browser flow. Cloud storage posture remains external. |
 | 3 Obligation extraction | Partial | Structured schema, exact source citation, source review and approval persisted; browser provider is synthetic, real model reliability unmeasured. |
 | 4 Control framework | Partial | Policy upload/parser API, control provenance persistence and manual control UI/review; real policy extraction unmeasured. Multi-page policy provenance needs further verification. |
@@ -86,8 +88,8 @@ Three additive migrations follow the previous `b2c3d4e5f6a7` head. Review every 
 | Secrets protected | Partial | Ignored secrets, regex scan, no client auth storage; managed deployment secrets unverified. |
 | Logs redacted | Partial | Safe validation/job/provider errors and log configuration; staging log collector not exercised. |
 | Rate limits exist | Verified locally | Redis protection tests, fail-closed production setting and tenant model quota test. Edge/proxy configuration open. |
-| Production: CI passes | Externally blocked | Workflow extended; no committed remote revision or passing run URL. |
-| Staging exists | Externally blocked | Owner must supply authorized hosting project/access. |
+| Production: CI passes | Verified at published revision | Main CI and Render Blueprint CI passed at `9e0ca67`; links above preserve run evidence. |
+| Staging exists | Externally blocked | Render preview blueprint is published; owner will approve plans and configure secrets in the Dashboard. No live service verified. |
 | Production deployment works | Externally blocked | No deployment approved or executed; images blocked by Docker Hub failures. |
 | Backups exist | Partial | Local encrypted snapshot exists; managed scheduling/retention unconfigured. |
 | Restore tested | Verified locally / partial production | Real isolated database+19-object restore; no cloud RTO/RPO/tenant smoke claim. |
@@ -124,10 +126,10 @@ Five bounded manual/deterministic paths are verified. This does **not** establis
 ## Precise blockers and next owner actions
 
 1. Keep model evaluation unpaid until an explicit spending budget and synthetic data-transfer approval are provided. Then review labels, run real predictions and score every item.
-2. Provide a staging hosting account/project and managed access, storage/retention/recovery requirements and approved monitoring destination. GitHub is a source remote, not a hosting target.
+2. Deploy the published Render preview blueprint after approving plans and configuring managed secrets and private storage. Confirm retention/recovery requirements and an approved monitoring destination. GitHub is a source remote, not a hosting target.
 3. Review remaining semantic change/impact, investigation, full remediation demo and policy-page provenance work; approve any necessary private-data egress separately. Automatic review rejected expanding private OpenAI prompts.
 4. Retry release image builds when Docker Hub returns successfully, scan images, then verify TLS/IAM/alerts/load/restore/rollback in staging.
 5. Resolve or explicitly triage the high frontend development dependency findings. No silent waiver was made.
-6. Separately authorize commit/push to obtain real GitHub Actions evidence, then approve any deployment or public submission after the remaining gates pass.
+6. GitHub publication is authorized and passing Actions evidence is linked above. Record deployed verification next; approve production or public submission only after the remaining acceptance gates pass.
 
 See [operations](OPERATIONS.md), [evaluation](ai-evaluation.md), [security](SECURITY_REVIEW.md) and [demo/submission draft](DEMO_AND_SUBMISSION.md). This package is a review handoff, not a production or final-submission approval.

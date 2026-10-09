@@ -34,3 +34,8 @@ backend/.ruff_cache/
 output/
 frontend/playwright-report/
 frontend/test-results/
+
+# Publish diagram specifications and HTML; keep local receipts and captures private
+.archify/*/*
+!.archify/*/candidate.json
+!.archify/*/*.html

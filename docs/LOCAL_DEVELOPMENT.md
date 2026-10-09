@@ -50,7 +50,7 @@ npx tsc --noEmit --incremental false
 npm run build
 ```
 
-GitHub Actions runs PostgreSQL/Redis backend checks, migrations/drift, security tests, worker imports, audits, frontend lint/type/build, and synthetic browser E2E. The checked-in workflow has not been exercised by this local environment.
+GitHub Actions runs PostgreSQL/Redis backend checks, migrations/drift, security tests, worker imports, audits, frontend lint/type/build, and synthetic browser E2E. [Main CI](https://github.com/rdx644/Regula-AI/actions/runs/37998241134) and [Render Blueprint CI](https://github.com/rdx644/Regula-AI/actions/runs/37998241179) passed at source revision `9e0ca67`. Fresh checkouts generate Next.js route types before running TypeScript checks.
 
 ## Production gates not satisfied by local checks
 

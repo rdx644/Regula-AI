@@ -22,7 +22,7 @@ All Render resources use Singapore. Review data residency before Apply. Render d
 1. Open [Create the RegulaAI Blueprint](https://dashboard.render.com/blueprint/new?repo=https://github.com/rdx644/Regula-AI), select the intended workspace, and authorize GitHub repository access if prompted. Use branch `main` and blueprint path `render.yaml`.
 2. Review the paid worker and every resource/plan before applying. Existing free database/Key Value instances can prevent creation of another free instance in the same workspace.
 3. Supply the settings below in Render's secure configuration. Do not paste credentials into chat or commit them.
-4. Apply only after confirming the plans and bucket access. Render builds both Docker images from the source. Base-image downloads and Linux builds still need successful Render evidence.
+4. Select **Deploy Blueprint** only after confirming the plans and bucket access. Render builds both Docker images from the source. Base-image downloads and Linux builds still need successful Render evidence.
 5. After the frontend receives its final hostname, set the API's `BACKEND_CORS_ORIGINS` to that exact HTTPS origin, then sync the blueprint so the worker's linked setting updates. Deploy API and worker again. Add any custom API hostname explicitly to `ALLOWED_HOSTS` before using it.
 6. Check the verification steps below before sharing the preview.
 
