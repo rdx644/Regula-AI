@@ -1,0 +1,32 @@
+# Provider-neutral release template. Inject secrets through the platform's secret
+# manager. Bind only to loopback; the authorized TLS ingress routes /api to api.
+services:
+  api:
+    image: ${REGULAAI_BACKEND_IMAGE:?Provide a reviewed immutable backend image}
+    env_file: ${REGULAAI_RUNTIME_ENV_FILE:?Provide a private runtime environment file}
+    ports: ["127.0.0.1:8000:8000"]
+    read_only: true
+    tmpfs: ["/tmp:size=64m"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os,urllib.request; urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:8000/api/health/live', headers={'Host':os.environ['HEALTHCHECK_HOST']}), timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+  worker:
+    image: ${REGULAAI_BACKEND_IMAGE:?Provide a reviewed immutable backend image}
+    command: ["python", "-m", "app.workers.main"]
+    env_file: ${REGULAAI_RUNTIME_ENV_FILE:?Provide a private runtime environment file}
+    read_only: true
+    tmpfs: ["/tmp:size=64m"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+  web:
+    image: ${REGULAAI_FRONTEND_IMAGE:?Provide a reviewed immutable frontend image}
+    ports: ["127.0.0.1:3000:3000"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped

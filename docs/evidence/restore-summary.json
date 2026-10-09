@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "scope": "disposable local PostgreSQL plus referenced local synthetic source objects",
+  "objects_restored": 19,
+  "recovery_seconds": 3.218,
+  "data_loss_window": "snapshot; no concurrent source writes during this drill",
+  "archive_sha256": "6fcd24f58a3bb89798fe737378abbfa7c2ff1a22c16c45faef87aefb3d3304c7",
+  "limitations": [
+    "This does not verify managed-cloud backup scheduling, KMS, IAM, retention, or staging RTO/RPO.",
+    "Local recovery key is excluded from Git; production requires a separate secret manager."
+  ]
+}

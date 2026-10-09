@@ -1,0 +1,22 @@
+{
+  "scope": "local HTTP read load against empty tenant matrix plus 20 actual parser-worker jobs; no external model",
+  "requests": 100,
+  "concurrency": 10,
+  "http_errors": 0,
+  "http_elapsed_seconds": 8.0,
+  "requests_per_second": 12.5,
+  "latency_ms": {
+    "p50": 250.0,
+    "p95": 3078.0,
+    "p99": 3094.0
+  },
+  "jobs_submitted": 20,
+  "jobs_succeeded": 20,
+  "worker_elapsed_seconds": 12.719,
+  "jobs_per_second": 1.57,
+  "queue_lag_seconds_max": 10.226,
+  "status": "passed",
+  "limitations": [
+    "No large-tenant query capacity, model latency/cost, cloud resource limits, or staging performance claim."
+  ]
+}

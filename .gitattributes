@@ -1,0 +1,5 @@
+# Store source consistently for Linux builds while accepting Windows worktrees.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary

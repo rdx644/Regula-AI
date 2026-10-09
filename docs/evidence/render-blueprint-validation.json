@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "schema_url": "https://render.com/schema/render.yaml.json",
+  "schema_sha256": "8a3fb8da6b4f55fe686fbefa790e011d3dd7895f013f355953c572a21ab6494a",
+  "resources": [
+    "regulaai-api",
+    "regulaai-worker",
+    "regulaai-web",
+    "regulaai-redis",
+    "regulaai-postgres"
+  ],
+  "model_execution_enabled": false,
+  "checks": [
+    "JSON schema",
+    "service references",
+    "Docker paths",
+    "private datastore inbound rules",
+    "noeviction",
+    "model disabled",
+    "staging/S3/rate-limit settings",
+    "paid worker plan explicitly disclosed"
+  ],
+  "workspace_validation": "blocked: no selected Render workspace/access",
+  "deployment": "not attempted: owner selected prepare/push only"
+}

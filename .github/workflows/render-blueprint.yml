@@ -1,0 +1,49 @@
+name: Render blueprint
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install schema validator
+        run: python -m pip install PyYAML==6.0.3 jsonschema==4.26.0
+      - name: Validate blueprint against Render's published schema
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from urllib.request import urlopen
+          import jsonschema
+          import yaml
+
+          with urlopen('https://render.com/schema/render.yaml.json', timeout=30) as response:
+              schema = json.load(response)
+          blueprint = yaml.safe_load(Path('render.yaml').read_text(encoding='utf-8'))
+          jsonschema.validate(blueprint, schema)
+          shared = {item['key']: item['value'] for item in blueprint['envVarGroups'][0]['envVars']}
+          assert shared['MODEL_EXECUTION_ENABLED'] == 'false'
+          assert shared['ENVIRONMENT'] == 'staging'
+          assert shared['STORAGE_BACKEND'] == 's3'
+          assert shared['ENABLE_RATE_LIMITING'] == 'true'
+          for service in blueprint['services']:
+              if service['type'] == 'keyvalue':
+                  assert service['ipAllowList'] == []
+                  assert service['maxmemoryPolicy'] == 'noeviction'
+              else:
+                  assert Path(service['dockerfilePath']).is_file()
+                  assert Path(service['dockerContext']).is_dir()
+          for database in blueprint['databases']:
+              assert database['ipAllowList'] == []
+          print('Render schema and preview security settings passed; no resources provisioned.')
+          PY

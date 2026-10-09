@@ -1,0 +1,180 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+# Preview blueprint. Review the PAID worker and fill private S3 credentials
+# before Apply. Free Postgres expires after 30 days; free Key Value is volatile.
+# Upgrade datastores and finish docs/SUBMISSION_READINESS.md before production.
+services:
+  - type: web
+    name: regulaai-api
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    # Free web services do not support preDeployCommand. This single-instance
+    # preview migrates before serving. Production needs a separate migration job.
+    dockerCommand: >-
+      sh -c 'python -m alembic upgrade head && exec python -m uvicorn
+      app.main:app --host 0.0.0.0 --port ${PORT:-10000} --no-proxy-headers'
+    healthCheckPath: /api/health/live
+    autoDeployTrigger: checksPass
+    maxShutdownDelaySeconds: 60
+    envVars:
+      - fromGroup: regulaai-preview-config
+      - key: SECRET_KEY
+        generateValue: true
+      - key: OPS_METRICS_TOKEN
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        fromService:
+          type: web
+          name: regulaai-api
+          envVarKey: RENDER_EXTERNAL_HOSTNAME
+      - key: BACKEND_CORS_ORIGINS
+        sync: false
+      - key: SQLALCHEMY_DATABASE_URI
+        fromDatabase:
+          name: regulaai-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: regulaai-redis
+          property: connectionString
+      - key: S3_BUCKET
+        sync: false
+      - key: AWS_REGION
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+
+  - type: worker
+    name: regulaai-worker
+    runtime: docker
+    # Render workers have no free plan. This is a proposed paid plan, not an
+    # authorization to provision it. The owner reviews it in the Dashboard.
+    plan: starter
+    region: singapore
+    branch: main
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerCommand: python -m app.workers.main
+    autoDeployTrigger: checksPass
+    maxShutdownDelaySeconds: 60
+    envVars:
+      - fromGroup: regulaai-preview-config
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: regulaai-api
+          envVarKey: SECRET_KEY
+      - key: ALLOWED_HOSTS
+        fromService:
+          type: web
+          name: regulaai-api
+          envVarKey: ALLOWED_HOSTS
+      - key: BACKEND_CORS_ORIGINS
+        fromService:
+          type: web
+          name: regulaai-api
+          envVarKey: BACKEND_CORS_ORIGINS
+      - key: SQLALCHEMY_DATABASE_URI
+        fromDatabase:
+          name: regulaai-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: regulaai-redis
+          property: connectionString
+      - key: S3_BUCKET
+        fromService:
+          type: web
+          name: regulaai-api
+          envVarKey: S3_BUCKET
+      - key: AWS_REGION
+        fromService:
+          type: web
+          name: regulaai-api
+          envVarKey: AWS_REGION
+      - key: AWS_ACCESS_KEY_ID
+        fromService:
+          type: web
+          name: regulaai-api
+          envVarKey: AWS_ACCESS_KEY_ID
+      - key: AWS_SECRET_ACCESS_KEY
+        fromService:
+          type: web
+          name: regulaai-api
+          envVarKey: AWS_SECRET_ACCESS_KEY
+
+  - type: web
+    name: regulaai-web
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    healthCheckPath: /
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: /api
+      - key: API_PROXY_ORIGIN
+        fromService:
+          type: web
+          name: regulaai-api
+          envVarKey: RENDER_EXTERNAL_URL
+
+  - type: keyvalue
+    name: regulaai-redis
+    plan: free
+    region: singapore
+    ipAllowList: []
+    maxmemoryPolicy: noeviction
+
+databases:
+  - name: regulaai-postgres
+    plan: free
+    region: singapore
+    postgresMajorVersion: "16"
+    databaseName: regulaai
+    user: regulaai
+    ipAllowList: []
+
+envVarGroups:
+  - name: regulaai-preview-config
+    envVars:
+      - key: ENVIRONMENT
+        value: staging
+      - key: PROJECT_NAME
+        value: RegulaAI
+      - key: API_V1_STR
+        value: /api
+      - key: JWT_ISSUER
+        value: regulaai-api
+      - key: JWT_AUDIENCE
+        value: regulaai-web
+      - key: ENABLE_RATE_LIMITING
+        value: "true"
+      - key: RATE_LIMIT_REQUESTS_PER_MINUTE
+        value: "120"
+      - key: LOGIN_RATE_LIMIT_PER_MINUTE
+        value: "10"
+      - key: AGENT_RATE_LIMIT_PER_MINUTE
+        value: "20"
+      - key: STORAGE_BACKEND
+        value: s3
+      - key: MAX_UPLOAD_BYTES
+        value: "26214400"
+      - key: MODEL_EXECUTION_ENABLED
+        value: "false"
+      - key: AI_REQUESTS_PER_TENANT_PER_DAY
+        value: "100"
+      - key: AI_TOKENS_PER_TENANT_PER_DAY
+        value: "200000"
+      - key: JOB_QUEUE_PREFIX
+        value: regulaai:render:preview

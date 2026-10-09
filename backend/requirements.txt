@@ -1,0 +1,24 @@
+# Direct runtime dependencies; unused LangChain/community/Jose adapters excluded.
+alembic==1.20.0
+argon2-cffi==25.1.0
+boto3==1.43.107
+email-validator==2.3.0
+fastapi==0.143.0
+httpx==0.28.1
+langchain-core==1.6.9
+langgraph==1.2.14
+langsmith==0.14.7
+openai==1.109.1
+pgvector==0.2.5
+psycopg2-binary==2.9.9
+pydantic==2.14.0
+pydantic-settings==2.2.1
+PyJWT==2.15.1
+PyMuPDF==1.28.2
+python-dotenv==1.2.4
+python-json-logger==4.2.0
+python-multipart==0.0.32
+redis==5.0.3
+SQLAlchemy==2.0.28
+tenacity==8.5.0
+uvicorn==0.27.1

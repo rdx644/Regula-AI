@@ -1,0 +1,110 @@
+{
+  "date": "2026-10-10",
+  "scope": "local synthetic verification; no paid model, commit/push, cloud deployment or submission",
+  "backend": {
+    "command": "python -m pytest -q --junitxml=../output/backend-final.xml",
+    "passed": 104,
+    "failures": 0,
+    "warnings": 27,
+    "seconds": 54.73
+  },
+  "migrations": {
+    "status": "passed",
+    "fresh_head": "f5a6b7c8d9e0",
+    "pgvector": "0.8.7",
+    "drift": "none"
+  },
+  "worker_handlers": 14,
+  "python_dependency_consistency": "passed",
+  "python_undefined_names": "passed",
+  "frontend": {
+    "lint": "passed after excluding generated Playwright reports",
+    "typecheck": "passed",
+    "production_build": "passed",
+    "browser_tests_passed": 5,
+    "browser_duration": "1.3 minutes",
+    "accessibility": "zero axe violations on tested sign-in, controls/evidence and matrix pages; keyboard and 390px layout checked",
+    "adapter": "synthetic obligation extraction only; other persisted workflows real/manual"
+  },
+  "dependency_audit": {
+    "backend_known_vulnerabilities": 0,
+    "frontend_runtime": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "frontend_full": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 5,
+      "critical": 0,
+      "total": 5
+    },
+    "development_finding": "open, no silent waiver"
+  },
+  "restore": {
+    "status": "passed",
+    "scope": "disposable local PostgreSQL plus referenced local synthetic source objects",
+    "objects_restored": 19,
+    "recovery_seconds": 3.218,
+    "data_loss_window": "snapshot; no concurrent source writes during this drill",
+    "limitations": [
+      "This does not verify managed-cloud backup scheduling, KMS, IAM, retention, or staging RTO/RPO.",
+      "Local recovery key is excluded from Git; production requires a separate secret manager."
+    ]
+  },
+  "load": {
+    "scope": "local HTTP read load against empty tenant matrix plus 20 actual parser-worker jobs; no external model",
+    "requests": 100,
+    "warmup_requests": 20,
+    "concurrency": 10,
+    "http_errors": 0,
+    "http_elapsed_seconds": 2.453,
+    "requests_per_second": 40.77,
+    "latency_ms": {
+      "p50": 78.0,
+      "p95": 2281.0,
+      "p99": 2359.0
+    },
+    "jobs_submitted": 20,
+    "jobs_succeeded": 20,
+    "worker_elapsed_seconds": 12.766,
+    "jobs_per_second": 1.57,
+    "queue_lag_seconds_max": 11.484,
+    "status": "passed",
+    "limitations": [
+      "No large-tenant query capacity, model latency/cost, cloud resource limits, or staging performance claim."
+    ]
+  },
+  "golden": {
+    "status": "not_run",
+    "intended": 10,
+    "evaluated": 0,
+    "reason": "Owner requires unpaid evaluation until a budget is provided"
+  },
+  "compose_local": "valid",
+  "compose_release": "valid with placeholder images/example env; not runtime/deployment evidence",
+  "container_builds": {
+    "backend": "blocked: Docker Hub auth HTTP 504 then 500",
+    "frontend": "blocked: Docker Hub auth HTTP 504"
+  },
+  "git": {
+    "remote": "https://github.com/rdx644/Regula-AI.git",
+    "project_root_initialized": true,
+    "commit": null,
+    "remote_ci": null
+  },
+  "remaining_gates": [
+    "real model evaluation and reviewed labels",
+    "complete semantic change/impact/remediation/investigation demo",
+    "F3/D2 evidence",
+    "development dependency security disposition",
+    "release image builds/scans",
+    "remote CI",
+    "authorized hosting/staging/IAM/TLS/alerts/retention/backups/rollback/production release"
+  ]
+}

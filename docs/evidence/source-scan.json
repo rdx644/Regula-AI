@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "files_scanned": 191,
+  "findings": [],
+  "scope": "all intended initial Git commit files; redacted regex scan; runtime files and artifacts excluded",
+  "limitations": [
+    "Regex coverage does not detect all credential formats."
+  ]
+}

@@ -1,0 +1,36 @@
+# Local secrets and environment settings
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+backend/venv/
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/var/private-uploads/
+
+# JavaScript / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/*.tsbuildinfo
+frontend/.env*
+!frontend/.env.example
+
+# Local tooling and OS files
+.DS_Store
+Thumbs.db
+*.log
+backend/.ruff_cache/
+.claude/
+.cursor/
+.vibecheck/
+.claude-strategies.json
+
+# Local verification, backups, browser traces and private recovery keys
+output/
+frontend/playwright-report/
+frontend/test-results/

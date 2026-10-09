@@ -1,0 +1,25 @@
+{
+  "status": "not_run",
+  "reason": "Provide predictions_path with one JSONL prediction per evaluated example.",
+  "dataset_size": 10,
+  "evaluated": 0,
+  "summary": {
+    "obligation_extraction": {
+      "total": 0,
+      "available": 5
+    },
+    "mapping": {
+      "total": 0,
+      "available": 2
+    },
+    "gap_identification": {
+      "total": 0,
+      "available": 2
+    },
+    "risk_assessment": {
+      "total": 0,
+      "available": 1
+    }
+  },
+  "details": []
+}

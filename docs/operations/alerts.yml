@@ -1,0 +1,27 @@
+groups:
+  - name: regulaai-proposed-alerts
+    rules:
+      - alert: RegulaAIWorkerMissing
+        expr: regulaai_workers_alive < 1
+        for: 2m
+        labels: {severity: critical}
+      - alert: RegulaAIJobFailed
+        expr: regulaai_jobs{state="failed"} > 0
+        for: 1m
+        labels: {severity: warning}
+      - alert: RegulaAIQueueBacklog
+        expr: regulaai_jobs{state="ready"} > 100
+        for: 5m
+        labels: {severity: warning}
+      - alert: RegulaAIDatabaseUnavailable
+        expr: regulaai_database_available == 0
+        for: 1m
+        labels: {severity: critical}
+      - alert: RegulaAIRedisUnavailable
+        expr: regulaai_redis_available == 0
+        for: 1m
+        labels: {severity: critical}
+      - alert: RegulaAIHTTPFailures
+        expr: sum(rate(regulaai_http_requests_total{status=~"5.."}[5m])) / clamp_min(sum(rate(regulaai_http_requests_total[5m])), 0.01) > 0.02
+        for: 5m
+        labels: {severity: warning}
