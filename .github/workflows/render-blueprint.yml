@@ -33,6 +33,8 @@ jobs:
               blueprint = yaml.safe_load(Path(filename).read_text(encoding='utf-8'))
               jsonschema.validate(blueprint, schema)
               for service in blueprint['services']:
+                  if service.get('plan') == 'free':
+                      assert 'maxShutdownDelaySeconds' not in service
                   if service['type'] == 'keyvalue':
                       assert service['ipAllowList'] == []
                       assert service['maxmemoryPolicy'] == 'noeviction'

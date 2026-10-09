@@ -16,7 +16,6 @@ services:
       app.main:app --host 0.0.0.0 --port ${PORT:-10000} --no-proxy-headers'
     healthCheckPath: /api/health/live
     autoDeployTrigger: checksPass
-    maxShutdownDelaySeconds: 60
     envVars:
       - fromGroup: regulaai-hackathon-config
       - key: SECRET_KEY
