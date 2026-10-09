@@ -60,6 +60,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 .button-primary:hover { background: #20594b; }
 .button-secondary { border-color: #dce5df; background: #fff; color: #43504c; }
 .button-secondary:hover { border-color: #aac8b8; background: #f7fbf8; }
+.button:disabled { opacity: 1; }
 .button-wide { width: 100%; min-height: 48px; margin-top: 3px; }
 .button-wide span { margin-left: auto; font-size: 16px; }
 .auth-switch { margin: 22px 0 0; color: #778480; text-align: center; font-size: 12px; }
