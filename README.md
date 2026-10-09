@@ -24,7 +24,7 @@ RegulaAI connects regulatory source documents with obligations, internal control
 | Scenarios | Isolated persisted what-if snapshots without changing the underlying landscape |
 | Background execution | Tenant-scoped jobs, deduplication, leases, retries and persisted agent traces |
 
-Structured AI agents are implemented, but real golden-set evaluation, semantic change/impact acceptance and some product capabilities remain open. The synthetic extraction adapter used by browser tests does not establish model quality. See the [feature and readiness matrix](docs/SUBMISSION_READINESS.md) for the exact scope.
+Structured AI agents are implemented, but real golden-set evaluation, semantic change/impact acceptance and some product capabilities remain open. The synthetic extraction adapter used by browser tests does not establish model quality. Submission and production gates are incomplete. See the [feature and readiness matrix](docs/SUBMISSION_READINESS.md) for the exact scope and remaining owner actions.
 
 ## Architecture
 
@@ -34,7 +34,7 @@ The logical application uses a Next.js workspace, a FastAPI service and a backgr
 
 **Explore the architecture:** [interactive HTML](.archify/architecture-regulaai-20261010-035812/regulaai.html) · [PNG](docs/assets/regulaai-architecture.png) · [SVG](docs/assets/regulaai-architecture.svg) · [diagram verification](docs/evidence/architecture-diagram.json).
 
-**Live view:** [open the interactive architecture diagram](https://rdx644.github.io/Regula-AI/architecture/). GitHub shows the static SVG in the README; clicking it opens the live page because GitHub sanitizes embedded HTML instead of running it. The live page provides source links, light/dark themes and image exports. Enable **Settings > Pages > Build and deployment > Source > GitHub Actions** once for this repository. The workflow publishes the standalone diagram when it changes. The downloaded HTML also opens locally. The Archify diagram is grounded in repository source at `9e0ca67`; all four delivery gates and browser checks pass. [Architecture notes and request sequence](ARCHITECTURE.md) explain the implementation boundaries.
+**Interactive diagram:** The [standalone HTML](.archify/architecture-regulaai-20261010-035812/regulaai.html) works locally and includes source links, light/dark themes and image exports. The [SVG preview](docs/assets/regulaai-architecture.svg) is shown in this README; GitHub does not run embedded interactive HTML. A [GitHub Pages workflow](.github/workflows/architecture-pages.yml) publishes the interactive page at [rdx644.github.io/Regula-AI/architecture](https://rdx644.github.io/Regula-AI/architecture/) after Pages is enabled for the repository. **One-time setup:** in GitHub, open **Settings → Pages** and choose **GitHub Actions** as the build and deployment source. Until that is done, the Pages workflow cannot publish and the live URL may be unavailable. Local validation, delivery, artifact, and browser checks for the Archify artifact passed; this does not verify GitHub Pages or a deployed application. See [architecture notes and request sequence](ARCHITECTURE.md) for implementation boundaries.
 
 ### Technology stack
 
@@ -120,7 +120,7 @@ The [hackathon blueprint](render.hackathon.yaml) defines free web, API, PostgreS
 1. Open [Create a Render Blueprint](https://dashboard.render.com/blueprint/new?repo=https://github.com/rdx644/Regula-AI), connect the repository and branch `main`, then set the blueprint path to `render.hackathon.yaml`.
 2. Confirm every listed service uses the **Free** plan. This blueprint has no separate paid worker and does not require S3.
 3. Select **Deploy Blueprint**. Render generates application secrets and links the API, frontend, database and Redis settings automatically.
-4. Open the assigned frontend URL. Require HTTP 200 from both `/api/health/live` and `/api/health` through that hostname. Readiness checks PostgreSQL, Redis and the embedded worker.
+4. Open the assigned frontend URL. Verify HTTP 200 from `/api/health/live` and `/api/health` through that hostname. Readiness checks PostgreSQL, Redis and the embedded worker. No Render service is currently confirmed deployed; complete these checks after deployment.
 5. Create a synthetic account and use synthetic documents. Re-upload if a service restart clears local uploads.
 
 Free web services sleep, free PostgreSQL expires after 30 days without managed backups, and free Key Value data can be lost on restart. Web/API filesystems are ephemeral. This profile is for a short synthetic demo. See [Render free service limits](https://render.com/docs/free) and the [complete Render guide](docs/RENDER_DEPLOYMENT.md). The separate S3-backed preview uses paid compute and requires an owner-provided bucket.
@@ -159,14 +159,15 @@ Before browser verification, install Chromium with `npx playwright install chrom
 
 | Evidence | Observed result |
 | --- | --- |
-| Local backend suite | 104 passing tests, including PostgreSQL/Redis authorization and worker checks |
-| Automated browser suite | Five passing tests; axe, keyboard and narrow-screen checks on covered pages |
+| Local backend suite | 104 passing tests, including PostgreSQL/Redis authorization and worker checks (recorded 2026-10-10) |
+| Automated browser suite | Five passing tests; axe, keyboard and narrow-screen checks on covered pages (recorded 2026-10-10) |
 | Database migrations | Head `f5a6b7c8d9e0`; fresh migrations and drift checks pass |
-| Frontend | Lint, type checking and production build pass |
-| GitHub CI | [Passing run at `9e0ca67`](https://github.com/rdx644/Regula-AI/actions/runs/37998241134) |
+| Frontend | Lint, type checking and production build pass (recorded 2026-10-10) |
+| GitHub CI | Main CI and Render Blueprint validation passed at source revision `9e0ca67`; see the workflow badges above for current status |
+| GitHub Pages | Publication workflow is present; repository Pages must be enabled with **GitHub Actions** before it can publish the interactive diagram |
 | Render Blueprint CI | [Passing run at `9e0ca67`](https://github.com/rdx644/Regula-AI/actions/runs/37998241179) |
-| Architecture diagram | Validation, delivery, artifact and browser gates pass; light/dark visual review completed |
-| Real model evaluation | Zero predictions; ten golden inputs await budget and label review |
+| Architecture diagram | Local validation, delivery, artifact and browser gates pass; light/dark visual review completed. These checks do not verify a live deployment. |
+| Real model evaluation | Not run: zero predictions; ten golden inputs await budget and label review |
 
 [Local verification evidence](docs/evidence/verification.json) records the earlier engineering audit and its limitations. These results establish the covered behavior, not production capacity, comprehensive penetration testing or regulatory model reliability. Current badges show the latest workflow state; the run links above preserve the observed source-revision evidence.
 
