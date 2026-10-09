@@ -30,11 +30,11 @@ Structured AI agents are implemented, but real golden-set evaluation, semantic c
 
 The logical application uses a Next.js workspace, a FastAPI service and a background worker. The browser sends same-origin `/api` requests through Next.js. PostgreSQL stores domain records and audit history, Redis coordinates jobs, and the application supports private S3 storage for durable deployments. The free hackathon profile runs the worker inside the API process and stores uploads on ephemeral local disk.
 
-![RegulaAI application architecture: reviewer, Next.js, FastAPI, PostgreSQL, Redis, background worker, private S3 and disabled OpenAI integration](docs/assets/regulaai-architecture.svg)
+[![Open the interactive RegulaAI architecture diagram](docs/assets/regulaai-architecture.svg)](https://rdx644.github.io/Regula-AI/architecture/)
 
 **Explore the architecture:** [interactive HTML](.archify/architecture-regulaai-20261010-035812/regulaai.html) · [PNG](docs/assets/regulaai-architecture.png) · [SVG](docs/assets/regulaai-architecture.svg) · [diagram verification](docs/evidence/architecture-diagram.json).
 
-Download the HTML and open it in a browser for source links, light/dark themes and image exports. The Archify diagram is grounded in repository source at `9e0ca67`; all four delivery gates and browser checks pass. [Architecture notes and request sequence](ARCHITECTURE.md) explain the implementation boundaries.
+**Live view:** [open the interactive architecture diagram](https://rdx644.github.io/Regula-AI/architecture/). GitHub shows the static SVG in the README; clicking it opens the live page because GitHub sanitizes embedded HTML instead of running it. The live page provides source links, light/dark themes and image exports. Enable **Settings > Pages > Build and deployment > Source > GitHub Actions** once for this repository. The workflow publishes the standalone diagram when it changes. The downloaded HTML also opens locally. The Archify diagram is grounded in repository source at `9e0ca67`; all four delivery gates and browser checks pass. [Architecture notes and request sequence](ARCHITECTURE.md) explain the implementation boundaries.
 
 ### Technology stack
 
