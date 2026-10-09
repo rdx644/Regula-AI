@@ -47,7 +47,7 @@ jobs:
       ENVIRONMENT: test
       REDIS_URL: redis://localhost:6379/0
       STORAGE_BACKEND: local
-      UPLOAD_STORAGE_DIR: ${{ runner.temp }}/regulaai-private-uploads
+      UPLOAD_STORAGE_DIR: /tmp/regulaai-private-uploads
       MODEL_EXECUTION_ENABLED: 'false'
       ALLOWED_HOSTS: '["localhost","testserver"]'
     steps:
@@ -100,7 +100,7 @@ jobs:
       ENVIRONMENT: test
       REDIS_URL: redis://localhost:6379/0
       STORAGE_BACKEND: local
-      UPLOAD_STORAGE_DIR: ${{ runner.temp }}/regulaai-browser-private-uploads
+      UPLOAD_STORAGE_DIR: /tmp/regulaai-browser-private-uploads
       ALLOWED_HOSTS: '["localhost","127.0.0.1","testserver"]'
       MODEL_EXECUTION_ENABLED: 'false'
       JOB_QUEUE_PREFIX: regulaai:browser:ci
