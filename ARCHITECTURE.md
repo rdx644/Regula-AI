@@ -6,7 +6,7 @@ The application is a modular monolith with a separate background worker. This di
 
 ![RegulaAI application architecture](docs/assets/regulaai-architecture.svg)
 
-[Download the interactive HTML](.archify/architecture-regulaai-20261010-035812/regulaai.html) and open it in a browser for source links, light/dark themes and export controls. The Archify specification pins source revision `9e0ca676c6432321e6ae8003e4c81ec9884960d3`. All four delivery gates pass, with browser checks and light/dark visual review recorded in [diagram evidence](docs/evidence/architecture-diagram.json).
+[Download the interactive HTML](.archify/architecture-regulaai-storage-20261010-051216/regulaai.html) and open it in a browser for source links, light/dark themes and export controls. The Archify specification pins inspected source revision `280fb4d1769d6e09265fca98a56b85b4f0c6c379`. All four delivery gates pass; automated light/dark browser captures and visual review are recorded in [diagram evidence](docs/evidence/architecture-diagram.json).
 
 ## System overview
 
@@ -34,7 +34,7 @@ flowchart LR
 
 - API routes authenticate and check organization membership/permissions before accessing tenant resources or linked records. Workers load trusted organization targets and recheck the initiating actor's current permission. Agent query context applies tenant criteria to scoped models.
 - PostgreSQL stores documents/versions, obligations/applicability, controls/policies, reviewed mappings, evidence/tests, gaps/risk, remediation, changes/impact, simulation snapshots, JWT revocation and audit/agent traces.
-- Development uses private local files. Staging/production require S3-compatible storage with encryption, blocked public access and versioning. There are no publicly served source paths.
+- The free `render.hackathon.yaml` profile selects private local files under `/tmp`; Render filesystems are ephemeral, so uploaded documents can be lost on restart or redeploy. The storage selector rejects local files in staging and production. The separate `render.yaml` profile selects S3-compatible storage with encryption, blocked public access and versioning. There are no publicly served source paths.
 - Redis handles atomic tenant/job/input-revision deduplication, priority queues, delayed retries and processing leases. Current worker lease ownership is checked before publishing results. PostgreSQL locks and completed-run replay protect repeated execution; domain agents also deduplicate selected persisted outputs. Redis/job retention and database traces are separate.
 - Model outputs use Pydantic schemas and untrusted-data instructions. Extraction quotes must be exact source spans. Model IDs must belong to supplied tenant candidates. Evidence/testing results remain proposals; consequential transitions require an authorized human reviewer.
 - Session cookies are HttpOnly, SameSite=Lax, Secure in staging/production; mutations require CSRF. Logout persists token revocation. Production hostname, origin, Redis protection and private storage settings fail closed.
@@ -67,6 +67,6 @@ The browser test replaces only extraction model calls with an explicit synthetic
 
 ## Deployment status and limits
 
-Dockerfiles, a provider-neutral Compose template and two Render profiles exist: `render.hackathon.yaml` for free temporary synthetic demos and `render.yaml` for the separate S3-backed preview with a paid worker. The hackathon profile embeds the worker in the API process and uses ephemeral local uploads; the diagram above shows the logical S3-capable architecture. Neither profile is a verified live service. No release image, cloud IAM, managed backups or alert delivery has been verified. See [Render deployment](docs/RENDER_DEPLOYMENT.md) and [operations](docs/OPERATIONS.md).
+Dockerfiles, a provider-neutral Compose template and two Render profiles exist: `render.hackathon.yaml` for free temporary synthetic demos and `render.yaml` for the separate S3-backed preview with a paid worker. The hackathon profile embeds the worker in the API process and uses ephemeral local uploads. The diagram shows that local demo path separately from the optional S3 profile. Neither profile is a verified live service. No release image, cloud IAM, managed backups or alert delivery has been verified. See [Render deployment](docs/RENDER_DEPLOYMENT.md) and [operations](docs/OPERATIONS.md).
 
 Vector storage is currently version-level. Local keyword retrieval works; obligation-level embedding ingestion and calibrated hybrid reranking remain incomplete. Version change/impact, cross-regulation and contradiction agents exist but have no scored real model run. Policy extraction has not completed a real model/multi-page demonstration. Investigation/planning tool selection and its product interface remain missing. Do not present those planned paths as verified features.

@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - ".archify/architecture-regulaai-20261010-035812/regulaai.html"
+      - ".archify/architecture-regulaai-storage-20261010-051216/regulaai.html"
       - ".github/workflows/architecture-pages.yml"
   workflow_dispatch:
 
@@ -31,7 +31,7 @@ jobs:
       - name: Prepare standalone diagram page
         run: |
           mkdir -p site/architecture
-          cp .archify/architecture-regulaai-20261010-035812/regulaai.html site/architecture/index.html
+          cp .archify/architecture-regulaai-storage-20261010-051216/regulaai.html site/architecture/index.html
           touch site/.nojekyll
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4

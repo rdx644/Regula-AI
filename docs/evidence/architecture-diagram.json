@@ -8,19 +8,19 @@
   },
   "source": {
     "repository": "https://github.com/rdx644/Regula-AI.git",
-    "revision": "9e0ca676c6432321e6ae8003e4c81ec9884960d3"
+    "revision": "280fb4d1769d6e09265fca98a56b85b4f0c6c379"
   },
   "specification": {
-    "path": ".archify/architecture-regulaai-20261010-035812/candidate.json",
-    "sha256": "fe0f1d429ba9c532a3079fc6dd5452dc1d8759df32d592c193a7f4d596bfd23c",
-    "bytes": 9080
+    "path": ".archify/architecture-regulaai-storage-20261010-051216/candidate.json",
+    "sha256": "b99ea79af3034981c5ef31e014b3a92cfe0aaaecb0d8970f00bcd43de96adcfa",
+    "bytes": 10318
   },
   "artifact": {
-    "path": ".archify/architecture-regulaai-20261010-035812/regulaai.html",
-    "sha256": "0037b77e7f422e9a3b45ccf81b9bf246e9af8aa0e90e128589f6b7332c63a8b3",
-    "bytes": 768311
+    "path": ".archify/architecture-regulaai-storage-20261010-051216/regulaai.html",
+    "sha256": "8c65b2e32cde003fd136aaf9fe0edc448155a30f47da31755b7f039be8a13583",
+    "bytes": 774554
   },
-  "delivery_receipt_id": "13ac9a86-faed-4712-9afa-53f4a6f41fc2",
+  "delivery_receipt_id": "8bfd10ab-1c39-4f60-8a73-47f6b3883418",
   "gates": {
     "validate": "pass",
     "deliver": "pass",
@@ -41,19 +41,19 @@
         "theme": "light"
       },
       {
-        "width": 1600,
-        "height": 1000,
-        "theme": "light"
-      },
-      {
-        "width": 1920,
-        "height": 1080,
-        "theme": "light"
+        "width": 1440,
+        "height": 900,
+        "theme": "dark"
       },
       {
         "width": 2048,
         "height": 1320,
         "theme": "light"
+      },
+      {
+        "width": 2048,
+        "height": 1320,
+        "theme": "dark"
       }
     ]
   },
@@ -84,25 +84,25 @@
   },
   "visual_review": {
     "status": "completed",
-    "method": "Inspected current 2048x1320 light and dark captures; checked node labels, routing, title, model-disabled condition and containment."
+    "method": "Inspected final 2048x1320 light and dark captures; verified labels, storage selection, optional S3 branch and containment."
   },
   "exports": [
     {
       "path": "docs/assets/regulaai-architecture.svg",
-      "sha256": "6ff5ae0c78ce673481d6f1dbe71eb2cdf02b35baaa9969b966aba59efa61a059",
-      "bytes": 157886
+      "sha256": "b9e918641c16e32954c6c45bdf18822ac5f9e70e0b0014759146ce5c2d2eac12",
+      "bytes": 163119
     },
     {
       "path": "docs/assets/regulaai-architecture.png",
-      "sha256": "8cfc459e0473cdd894855f4c345b79695b1ae50fbe9a481a76f3b3e65b7db3a6",
-      "bytes": 689263
+      "sha256": "8317b0a5475556b895e34bc7e7465d4bb119e69920b60e6d8539b807957231d4",
+      "bytes": 851448
     }
   ],
   "scope": "Diagram validation and visual checks do not certify a deployed service or production acceptance.",
   "local_receipts": {
-    "finalize": ".archify/architecture-regulaai-20261010-035812/review-3/regulaai.finalize-summary.json",
-    "browser": ".archify/architecture-regulaai-20261010-035812/review-3/regulaai.browser-check.json",
-    "captures": ".archify/architecture-regulaai-20261010-035812/visual-check-2/regulaai.visual-check.json"
+    "finalize": ".archify/architecture-regulaai-storage-20261010-051216/review-4/regulaai.finalize-summary.json",
+    "browser": ".archify/architecture-regulaai-storage-20261010-051216/review-4/regulaai.browser-check.json",
+    "captures": ".archify/architecture-regulaai-storage-20261010-051216/visual-check-final/regulaai.visual-check.json"
   },
-  "receipt_note": "Local tool sidecars and captures are excluded from Git. This portable summary binds the published specification, HTML and exports by SHA-256."
+  "receipt_note": "This portable summary binds the source-pinned Archify specification, interactive HTML, static SVG/PNG exports and final browser/visual receipts by SHA-256. Local receipts and captures are excluded from Git."
 }

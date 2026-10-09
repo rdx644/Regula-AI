@@ -28,13 +28,13 @@ Structured AI agents are implemented, but real golden-set evaluation, semantic c
 
 ## Architecture
 
-The logical application uses a Next.js workspace, a FastAPI service and a background worker. The browser sends same-origin `/api` requests through Next.js. PostgreSQL stores domain records and audit history, Redis coordinates jobs, and the application supports private S3 storage for durable deployments. The free hackathon profile runs the worker inside the API process and stores uploads on ephemeral local disk.
+The logical application uses a Next.js workspace, a FastAPI service and a background worker. The browser sends same-origin `/api` requests through Next.js. PostgreSQL stores domain records and audit history, and Redis coordinates jobs. The free hackathon profile runs the worker inside the API process and stores uploads on ephemeral local disk. S3 is an optional, separate durable deployment profile; the free profile does not use S3.
 
 [![Open the interactive RegulaAI architecture diagram](docs/assets/regulaai-architecture.svg)](https://rdx644.github.io/Regula-AI/architecture/)
 
-**Explore the architecture:** [interactive HTML](.archify/architecture-regulaai-20261010-035812/regulaai.html) · [PNG](docs/assets/regulaai-architecture.png) · [SVG](docs/assets/regulaai-architecture.svg) · [diagram verification](docs/evidence/architecture-diagram.json).
+**Explore the architecture:** [interactive HTML](.archify/architecture-regulaai-storage-20261010-051216/regulaai.html) · [PNG](docs/assets/regulaai-architecture.png) · [SVG](docs/assets/regulaai-architecture.svg) · [diagram verification](docs/evidence/architecture-diagram.json).
 
-**Interactive diagram:** The [standalone HTML](.archify/architecture-regulaai-20261010-035812/regulaai.html) works locally and includes source links, light/dark themes and image exports. The [SVG preview](docs/assets/regulaai-architecture.svg) is shown in this README; GitHub does not run embedded interactive HTML. A [GitHub Pages workflow](.github/workflows/architecture-pages.yml) publishes the interactive page at [rdx644.github.io/Regula-AI/architecture](https://rdx644.github.io/Regula-AI/architecture/) after Pages is enabled for the repository. **One-time setup:** in GitHub, open **Settings → Pages** and choose **GitHub Actions** as the build and deployment source. Until that is done, the Pages workflow cannot publish and the live URL may be unavailable. Local validation, delivery, artifact, and browser checks for the Archify artifact passed; this does not verify GitHub Pages or a deployed application. See [architecture notes and request sequence](ARCHITECTURE.md) for implementation boundaries.
+**Interactive diagram:** The [standalone HTML](.archify/architecture-regulaai-storage-20261010-051216/regulaai.html) works locally and includes source links, light/dark themes and image exports. The [SVG preview](docs/assets/regulaai-architecture.svg) is shown in this README; GitHub does not run embedded interactive HTML. A [GitHub Pages workflow](.github/workflows/architecture-pages.yml) publishes the interactive page at [rdx644.github.io/Regula-AI/architecture](https://rdx644.github.io/Regula-AI/architecture/) after Pages is enabled for the repository. **One-time setup:** in GitHub, open **Settings → Pages** and choose **GitHub Actions** as the build and deployment source. Until that is done, the Pages workflow cannot publish and the live URL may be unavailable. Local validation, delivery, artifact, and browser checks for the Archify artifact passed; this does not verify GitHub Pages or a deployed application. See [architecture notes and request sequence](ARCHITECTURE.md) for implementation boundaries.
 
 ### Technology stack
 
@@ -164,7 +164,7 @@ Before browser verification, install Chromium with `npx playwright install chrom
 | Database migrations | Head `f5a6b7c8d9e0`; fresh migrations and drift checks pass |
 | Frontend | Lint, type checking and production build pass (recorded 2026-10-10) |
 | GitHub CI | Main CI and Render Blueprint validation passed at source revision `9e0ca67`; see the workflow badges above for current status |
-| GitHub Pages | Publication workflow is present; repository Pages must be enabled with **GitHub Actions** before it can publish the interactive diagram |
+| GitHub Pages | The workflow requires Pages to be enabled with **GitHub Actions** under **Settings > Pages**; until then, the interactive URL is unavailable |
 | Render Blueprint CI | [Passing run at `9e0ca67`](https://github.com/rdx644/Regula-AI/actions/runs/37998241179) |
 | Architecture diagram | Local validation, delivery, artifact and browser gates pass; light/dark visual review completed. These checks do not verify a live deployment. |
 | Real model evaluation | Not run: zero predictions; ten golden inputs await budget and label review |

@@ -1,0 +1,445 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "RegulaAI: Application architecture",
+    "locale": "en",
+    "output": ".archify/architecture-regulaai-storage-20261010-051216/regulaai.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/rdx644/Regula-AI.git",
+      "revision": "280fb4d1769d6e09265fca98a56b85b4f0c6c379",
+      "provider": "github",
+      "link_mode": "web"
+    }
+  },
+  "components": [
+    {
+      "id": "reviewer",
+      "type": "external",
+      "label": "Compliance reviewer",
+      "sublabel": "Source review + decisions",
+      "pos": [
+        40,
+        60
+      ],
+      "size": [
+        220,
+        84
+      ],
+      "sources": [
+        {
+          "path": "backend/app/api/endpoints/controls.py",
+          "line": 372,
+          "end_line": 405,
+          "label": "Authorized human review"
+        }
+      ],
+      "icon": "person"
+    },
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "Next.js workspace",
+      "sublabel": "Intake, controls, evidence",
+      "pos": [
+        400,
+        60
+      ],
+      "size": [
+        220,
+        84
+      ],
+      "sources": [
+        {
+          "path": "frontend/src/app/ControlWorkspace.tsx",
+          "line": 1,
+          "end_line": 28,
+          "label": "Cookie / CSRF requests"
+        },
+        {
+          "path": "frontend/next.config.ts",
+          "line": 3,
+          "end_line": 24,
+          "label": "Same-origin API proxy"
+        },
+        {
+          "path": "render.yaml",
+          "line": 118,
+          "end_line": 137,
+          "label": "Configured web service"
+        }
+      ],
+      "tag": "Browser calls /api"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "FastAPI service",
+      "sublabel": "Tenant permissions + reviews",
+      "pos": [
+        400,
+        280
+      ],
+      "size": [
+        220,
+        84
+      ],
+      "sources": [
+        {
+          "path": "backend/app/api/deps.py",
+          "line": 35,
+          "end_line": 95,
+          "label": "Session authorization"
+        },
+        {
+          "path": "backend/app/api/endpoints/regulations.py",
+          "line": 155,
+          "end_line": 257,
+          "label": "Private upload / enqueue"
+        },
+        {
+          "path": "backend/app/api/endpoints/controls.py",
+          "line": 372,
+          "end_line": 405,
+          "label": "Review commits state"
+        }
+      ],
+      "tag": "Human approval required"
+    },
+    {
+      "id": "records",
+      "type": "database",
+      "label": "PostgreSQL + pgvector",
+      "sublabel": "Domain records + audit",
+      "pos": [
+        40,
+        520
+      ],
+      "size": [
+        220,
+        84
+      ],
+      "sources": [
+        {
+          "path": "backend/app/db/session.py",
+          "line": 1,
+          "end_line": 6,
+          "label": "SQLAlchemy sessions"
+        },
+        {
+          "path": "backend/app/services/execution.py",
+          "line": 49,
+          "end_line": 104,
+          "label": "Persist execution traces"
+        },
+        {
+          "path": "backend/alembic/versions/a1b2c3d4e5f6_add_pgvector_embedding.py",
+          "line": 21,
+          "end_line": 31,
+          "label": "Version embeddings"
+        }
+      ],
+      "tag": "System of record"
+    },
+    {
+      "id": "queue",
+      "type": "messagebus",
+      "label": "Redis job queue",
+      "sublabel": "Deduplication, leases, retries",
+      "pos": [
+        400,
+        520
+      ],
+      "size": [
+        220,
+        84
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/queue.py",
+          "line": 83,
+          "end_line": 171,
+          "label": "Atomic queue / lease"
+        },
+        {
+          "path": "backend/app/services/queue.py",
+          "line": 174,
+          "end_line": 236,
+          "label": "Completion / retry"
+        },
+        {
+          "path": "backend/app/services/queue.py",
+          "line": 238,
+          "end_line": 318,
+          "label": "Worker queue consumption"
+        }
+      ]
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "Background worker",
+      "sublabel": "Parse, assess, propose",
+      "pos": [
+        400,
+        820
+      ],
+      "size": [
+        220,
+        84
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/queue.py",
+          "line": 238,
+          "end_line": 318,
+          "label": "Dispatch / timeout"
+        },
+        {
+          "path": "backend/app/workers/handlers.py",
+          "line": 1,
+          "end_line": 401,
+          "label": "Parser / agent handlers"
+        },
+        {
+          "path": "backend/app/services/execution.py",
+          "line": 49,
+          "end_line": 104,
+          "label": "Actor check / trace write"
+        }
+      ],
+      "tag": "Recheck actor permissions"
+    },
+    {
+      "id": "models",
+      "type": "external",
+      "label": "OpenAI integration",
+      "sublabel": "Structured JSON proposals",
+      "pos": [
+        400,
+        1060
+      ],
+      "size": [
+        220,
+        84
+      ],
+      "sources": [
+        {
+          "path": "backend/app/core/ai_provider.py",
+          "line": 60,
+          "end_line": 64,
+          "label": "Execution disabled guard"
+        },
+        {
+          "path": "backend/app/core/ai_provider.py",
+          "line": 108,
+          "end_line": 140,
+          "label": "Call / schema validation"
+        },
+        {
+          "path": "render.yaml",
+          "line": 166,
+          "end_line": 172,
+          "label": "Model execution off"
+        }
+      ],
+      "tag": "Disabled pending budget"
+    },
+    {
+      "id": "storageAdapter",
+      "type": "backend",
+      "label": "Private storage adapter",
+      "sublabel": "Selected by STORAGE_BACKEND",
+      "pos": [
+        700,
+        520
+      ],
+      "size": [
+        195,
+        84
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/storage.py",
+          "line": 154,
+          "end_line": 162,
+          "label": "Select storage backend"
+        },
+        {
+          "path": "backend/app/core/config.py",
+          "line": 100,
+          "end_line": 103,
+          "label": "Demo vs durable guard"
+        }
+      ],
+      "tag": "One backend at a time"
+    },
+    {
+      "id": "localUploads",
+      "type": "database",
+      "label": "Temporary local files",
+      "sublabel": "Ephemeral Render disk at /tmp",
+      "pos": [
+        998,
+        520
+      ],
+      "size": [
+        195,
+        84
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/storage.py",
+          "line": 43,
+          "end_line": 48,
+          "label": "Local storage adapter"
+        },
+        {
+          "path": "render.hackathon.yaml",
+          "line": 101,
+          "end_line": 104,
+          "label": "Free demo configuration"
+        }
+      ],
+      "tag": "Ephemeral on Render"
+    },
+    {
+      "id": "s3Bucket",
+      "type": "cloud",
+      "label": "Private S3 bucket",
+      "sublabel": "Optional durable profile",
+      "pos": [
+        998,
+        820
+      ],
+      "size": [
+        195,
+        84
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/storage.py",
+          "line": 91,
+          "end_line": 114,
+          "label": "Private S3 adapter"
+        },
+        {
+          "path": "render.yaml",
+          "line": 43,
+          "end_line": 47,
+          "label": "Bucket credentials"
+        },
+        {
+          "path": "render.yaml",
+          "line": 168,
+          "end_line": 169,
+          "label": "S3 preview selection"
+        }
+      ],
+      "tag": "Not used by free demo"
+    }
+  ],
+  "connections": [
+    {
+      "id": "reviewer-web",
+      "from": "reviewer",
+      "to": "web",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "web-api",
+      "from": "web",
+      "to": "api",
+      "label": "Cookie + CSRF",
+      "variant": "security"
+    },
+    {
+      "id": "api-records",
+      "from": "api",
+      "to": "records",
+      "label": "Review writes"
+    },
+    {
+      "id": "api-queue",
+      "from": "api",
+      "to": "queue",
+      "label": "Enqueue",
+      "variant": "dashed"
+    },
+    {
+      "id": "queue-worker",
+      "from": "queue",
+      "to": "worker",
+      "label": "Leased job",
+      "variant": "dashed"
+    },
+    {
+      "id": "worker-records",
+      "from": "worker",
+      "to": "records",
+      "label": "Results + traces"
+    },
+    {
+      "id": "worker-models",
+      "from": "worker",
+      "to": "models",
+      "label": "Off until approved",
+      "variant": "dashed"
+    },
+    {
+      "id": "api-storage",
+      "from": "api",
+      "to": "storageAdapter",
+      "label": "Private upload / access"
+    },
+    {
+      "id": "worker-storage",
+      "from": "worker",
+      "to": "storageAdapter",
+      "label": "Read source + evidence"
+    },
+    {
+      "id": "storage-local",
+      "from": "storageAdapter",
+      "to": "localUploads",
+      "label": "Free demo: local",
+      "variant": "emphasis"
+    },
+    {
+      "id": "storage-s3",
+      "from": "storageAdapter",
+      "to": "s3Bucket",
+      "label": "Optional preview: S3",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Traceable compliance",
+      "items": [
+        "Regulations to obligations, controls, evidence, tests, gaps and remediation.",
+        "PostgreSQL holds reviewed records and agent traces; source bytes stay in private storage."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Governed execution",
+      "items": [
+        "API checks tenant membership and review permissions. Workers recheck the initiating actor.",
+        "Model output is validated before persistence; consequential decisions require human review."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Preview deployment",
+      "items": [
+        "Free Render hackathon profile selects local files under /tmp; uploads are ephemeral.",
+        "The separate S3-backed Render preview requires a private bucket and is not part of the free profile.",
+        "No live cloud deployment is asserted. OpenAI remains disabled."
+      ]
+    }
+  ]
+}
