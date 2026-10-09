@@ -14,7 +14,7 @@ The API session uses an HttpOnly cookie and a CSRF token held in page memory. Th
 
 ## Checks
 
-Run `npm run lint`, `npx tsc --noEmit --incremental false`, and `npm run build` from this directory.
+Run `npm run lint`, `npx next typegen`, `npx tsc --noEmit --incremental false`, and `npm run build` from this directory. Type generation is required on a fresh checkout before checking global Next.js route/layout types.
 
 
 The control library supports manual control proposals/approval, reviewed mappings, private evidence inspection/review and reviewed tests. The matrix supports applicability/source decisions and tracked gap/remediation jobs. AI execution is disabled pending owner budget approval.

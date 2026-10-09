@@ -126,7 +126,9 @@ jobs:
       - name: Lint
         run: npm run lint
       - name: Type check
-        run: npx tsc --noEmit --incremental false
+        run: |
+          npx next typegen
+          npx tsc --noEmit --incremental false
       - name: Production build
         run: npm run build
       - name: Audit frontend runtime dependencies

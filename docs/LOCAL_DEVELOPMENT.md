@@ -45,6 +45,7 @@ venv\Scripts\python.exe -m pytest -q
 
 # frontend (from frontend)
 npm run lint
+npx next typegen
 npx tsc --noEmit --incremental false
 npm run build
 ```

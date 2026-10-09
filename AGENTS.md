@@ -50,7 +50,7 @@ Code is not complete unless:
 - Backend migrations: `cd backend; venv/Scripts/alembic upgrade head` (Windows)
 - Backend tests: `cd backend; venv/Scripts/python -m pytest -q`
 - Frontend: `cd frontend; npm run dev`
-- Frontend checks: `cd frontend; npm run lint` and `npx tsc --noEmit --incremental false`
+- Frontend checks: `cd frontend; npm run lint`, `npx next typegen`, then `npx tsc --noEmit --incremental false`
 
 ## Repository Structure
 - `/frontend`: Next.js web application.
