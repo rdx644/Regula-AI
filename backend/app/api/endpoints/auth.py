@@ -25,7 +25,7 @@ def login_access_token(
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     token = security.create_access_token(str(user.id), expires_delta=access_token_expires)
     csrf_token = secrets.token_urlsafe(32)
-    secure = settings.ENVIRONMENT.lower() in {"staging", "production"}
+    secure = settings.SESSION_COOKIE_SECURE or settings.ENVIRONMENT.lower() in {"staging", "production"}
     response.set_cookie(
         deps.SESSION_COOKIE,
         token,
@@ -65,6 +65,7 @@ def logout(request: Request, response: Response, db: Session = Depends(deps.get_
     claims = request.state.session_claims
     db.merge(RevokedSession(id=claims["jti"], user_id=current_user.id, expires_at=datetime.fromtimestamp(claims["exp"], timezone.utc)))
     db.commit()
-    response.delete_cookie(deps.SESSION_COOKIE, path="/")
-    response.delete_cookie(deps.CSRF_COOKIE, path="/")
+    secure = settings.SESSION_COOKIE_SECURE or settings.ENVIRONMENT.lower() in {"staging", "production"}
+    response.delete_cookie(deps.SESSION_COOKIE, path="/", secure=secure, httponly=True, samesite="lax")
+    response.delete_cookie(deps.CSRF_COOKIE, path="/", secure=secure, httponly=False, samesite="lax")
     return {"status": "signed_out"}

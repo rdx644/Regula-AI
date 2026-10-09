@@ -4,6 +4,8 @@ Date: 2026-10-10. **Submission gate: incomplete. Production gate: blocked.**
 
 The local engineering work is reviewable and the synthetic browser workflow is reproducible. The owner's instruction keeps evaluation unpaid until a budget is supplied. The owner subsequently authorized GitHub publication and Render blueprint preparation, selecting **prepare/push only; approve plans and secrets in Render**. See [Render setup](RENDER_DEPLOYMENT.md). Staging deployment remains unverified; do not present the remaining gates as passed.
 
+Hackathon hosting update: the owner clarified this is a temporary web demo. `render.hackathon.yaml` targets free services with synthetic data, Secure cookies, Redis-backed rate limits, an embedded one-slot worker and ephemeral local uploads. This does not satisfy the separate durable S3-backed production gate. No Render account/workspace is configured and no resources have been created.
+
 Publication update: source revision `9e0ca67` is pushed to GitHub. [Main CI](https://github.com/rdx644/Regula-AI/actions/runs/37998241134) and [Render Blueprint CI](https://github.com/rdx644/Regula-AI/actions/runs/37998241179) passed. The README includes a source-backed Archify diagram with [verification evidence](evidence/architecture-diagram.json).
 
 ## Verified local evidence
@@ -126,7 +128,7 @@ Five bounded manual/deterministic paths are verified. This does **not** establis
 ## Precise blockers and next owner actions
 
 1. Keep model evaluation unpaid until an explicit spending budget and synthetic data-transfer approval are provided. Then review labels, run real predictions and score every item.
-2. Deploy the published Render preview blueprint after approving plans and configuring managed secrets and private storage. Confirm retention/recovery requirements and an approved monitoring destination. GitHub is a source remote, not a hosting target.
+2. For the hackathon, create a Render Blueprint from `render.hackathon.yaml`, confirm the Free plans, and verify the synthetic demo. Do not put real bank data in ephemeral storage. For any separate banking-production target, approve durable managed services, private storage, recovery requirements and monitoring; that gate remains open.
 3. Review remaining semantic change/impact, investigation, full remediation demo and policy-page provenance work; approve any necessary private-data egress separately. Automatic review rejected expanding private OpenAI prompts.
 4. Retry release image builds when Docker Hub returns successfully, scan images, then verify TLS/IAM/alerts/load/restore/rollback in staging.
 5. Resolve or explicitly triage the high frontend development dependency findings. No silent waiver was made.

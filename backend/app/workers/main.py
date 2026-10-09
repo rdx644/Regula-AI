@@ -21,7 +21,7 @@ async def main():
         worker_id=f"regulaai-worker-{settings.ENVIRONMENT}-{platform.node()}-{os.getpid()}-{uuid4().hex[:8]}",
         handlers=handlers,
         poll_interval=1.0,
-        max_concurrent=5,
+        max_concurrent=settings.WORKER_MAX_CONCURRENT,
     )
 
     loop = asyncio.get_running_loop()

@@ -1,65 +1,48 @@
-# Deploy a RegulaAI preview on Render
+# Deploy the temporary RegulaAI hackathon demo on Render
 
 ## Scope and authorization
 
-The owner authorized creating `render.yaml` and committing/pushing the required project files to `https://github.com/rdx644/Regula-AI.git`. The owner selected **prepare/push only; approve plans and secrets in Render**. This work does not provision resources or claim a live deployment. `MODEL_EXECUTION_ENABLED=false`; no OpenAI key is requested by the blueprint.
+The owner authorized preparing and pushing deployment files, while approving resource plans and configuration in Render. The target is a temporary hackathon demo on free services. This work does not provision resources or claim a live deployment. `MODEL_EXECUTION_ENABLED=false`; no OpenAI key or S3 account is needed for this profile.
 
 ## Blueprint topology
 
 | Resource | Plan | Purpose |
 | --- | --- | --- |
-| `regulaai-web` | Free web | Next.js standalone Docker application; same-origin `/api` proxy |
-| `regulaai-api` | Free web | FastAPI Docker application; authenticated public API |
-| `regulaai-worker` | Starter, **paid** | Separate Redis worker; proposed plan requiring owner approval |
-| `regulaai-postgres` | Free | PostgreSQL 16; migrations enable pgvector |
-| `regulaai-redis` | Free | Internal-only Key Value with `noeviction` |
-| Private S3 bucket | Owner supplied | Encrypted, versioned, public access blocked; no local upload storage |
+| `regulaai-hackathon-web` | Free web | Next.js Docker application; same-origin `/api` proxy |
+| `regulaai-hackathon-api` | Free web | FastAPI plus one embedded queue worker |
+| `regulaai-hackathon-postgres` | Free | PostgreSQL 16; migrations enable pgvector |
+| `regulaai-hackathon-redis` | Free | Internal-only Key Value with `noeviction` |
+| Upload storage | Ephemeral local disk | Synthetic demo files only; may disappear on restart or redeploy |
 
-All Render resources use Singapore. Review data residency before Apply. Render does not provide a free background worker; do not change it to an unsupported free worker plan. Free web services sleep, free Postgres expires after 30 days and has no backups, and free Key Value loses data on restart. This is a **preview configuration**, not a production durability or capacity claim. Upgrade and revalidate the plans before relying on persistent jobs, rate-limit quotas, sessions or production data. See [Render free limits](https://render.com/docs/free).
+All Render resources use Singapore. The separate root `render.yaml` remains the S3-backed preview with paid standalone worker. Free web services sleep, free Postgres expires after 30 days without managed backups, free Key Value data can be lost on restart, and local uploads are ephemeral. These limits make this a **temporary synthetic demo**, not durable or banking production hosting. See [Render free limits](https://render.com/docs/free).
 
 ## Dashboard steps
 
-1. Open [Create the RegulaAI Blueprint](https://dashboard.render.com/blueprint/new?repo=https://github.com/rdx644/Regula-AI), select the intended workspace, and authorize GitHub repository access if prompted. Use branch `main` and blueprint path `render.yaml`.
-2. Review the paid worker and every resource/plan before applying. Existing free database/Key Value instances can prevent creation of another free instance in the same workspace.
-3. Supply the settings below in Render's secure configuration. Do not paste credentials into chat or commit them.
-4. Select **Deploy Blueprint** only after confirming the plans and bucket access. Render builds both Docker images from the source. Base-image downloads and Linux builds still need successful Render evidence.
-5. After the frontend receives its final hostname, set the API's `BACKEND_CORS_ORIGINS` to that exact HTTPS origin, then sync the blueprint so the worker's linked setting updates. Deploy API and worker again. Add any custom API hostname explicitly to `ALLOWED_HOSTS` before using it.
-6. Check the verification steps below before sharing the preview.
+1. Open [Create a Render Blueprint](https://dashboard.render.com/blueprint/new?repo=https://github.com/rdx644/Regula-AI), select the workspace, authorize GitHub if prompted, and set branch `main` with blueprint path `render.hackathon.yaml`.
+2. Review the resource list and confirm all four services use the **Free** plan. If the workspace has reached a free database or Key Value limit, Render may require removal of another unused resource or a different workspace.
+3. Select **Deploy Blueprint**. The blueprint generates signing and metrics secrets, references the API and frontend hostnames automatically, and creates internal PostgreSQL/Redis references. No S3, AWS credentials, manual CORS origin or model key is requested.
+4. Wait for the API and frontend builds. The API runs migrations, then starts FastAPI and a single embedded worker. A build or migration failure must be fixed before continuing.
+5. Use the frontend URL Render assigns. The API proxy URL is injected into the frontend build; hostname changes require a frontend rebuild.
 
-### Settings prompted by the blueprint
-
-| Setting | Enter in the API service |
-| --- | --- |
-| `BACKEND_CORS_ORIGINS` | Exact frontend HTTPS origin, e.g. `https://your-assigned-web-host.onrender.com`. If the creation form has not assigned it yet, enter the intended HTTPS origin and correct it after creation. No wildcard. |
-| `S3_BUCKET` | Name of an existing private bucket approved for this environment |
-| `AWS_REGION` | Bucket region, e.g. `ap-south-1`; match the bucket |
-| `AWS_ACCESS_KEY_ID` | Managed, scoped deployment credential |
-| `AWS_SECRET_ACCESS_KEY` | Matching managed secret |
-
-`SECRET_KEY` and `OPS_METRICS_TOKEN` are generated by Render. The worker references the API's signing key, origins, allowed hosts and storage settings. Database/Redis connection strings use internal service references. API `ALLOWED_HOSTS` references its actual `RENDER_EXTERNAL_HOSTNAME`; frontend `API_PROXY_ORIGIN` references the API's actual `RENDER_EXTERNAL_URL`. No URLs or secrets need to be embedded in source. See [service references](https://render.com/docs/blueprint-spec).
-
-The default storage setup targets AWS S3. For another compatible service, configure `S3_ENDPOINT_URL` on **both** API and worker and validate its public-access, encryption and versioning APIs. Session credentials also require `AWS_SESSION_TOKEN` on both services plus a rotation/restart mechanism. Do not weaken storage readiness if the provider lacks required controls.
-
-Grant the bucket identity only needed object actions and configuration read actions, including bucket access, object get/put/delete, public-access-block read, encryption read and versioning read. Keep all four public access blocks enabled, versioning enabled, and default encryption configured; writes request SSE-S3/AES256. Review actual cloud IAM and retention separately.
+The demo environment sets Secure session cookies, CSRF protection, explicit HTTPS CORS/host restrictions, Redis-backed rate limiting, and one worker slot. Model execution stays off. The `demo` application mode accepts local storage only for this explicitly temporary profile; `staging` and `production` continue to require private S3.
 
 ### Routing and deploy order
 
-The browser uses relative `/api` calls. Next.js rewrites them to the configured API upstream, preserving a single browser origin for the HttpOnly session and CSRF cookies. A direct browser call between two `onrender.com` services is not the configured flow. The proxy origin is validated and compiled at build time; changing API hostnames requires rebuilding the frontend. Only the public upstream URL is used as a Docker build argument; backend credentials are never copied into the frontend build. See [Render Docker environment translation](https://render.com/docs/docker).
+The browser uses relative `/api` calls. Next.js rewrites them to the API service, preserving one browser origin for the HttpOnly session and CSRF cookies. The public API origin is compiled into the frontend; changing it requires rebuilding the frontend. No backend credential is passed as a frontend build argument. See [Render Docker environment translation](https://render.com/docs/docker).
 
-On the single-instance free API, the Docker start command runs `alembic upgrade head` before starting Uvicorn on `0.0.0.0:$PORT`. A migration failure prevents startup. The worker uses `python -m app.workers.main`; it does not run migrations. API liveness is the platform deployment probe to avoid an API/worker startup dependency cycle; full readiness remains a separate required check. Automatic deploys are set to `checksPass`; the initial blueprint creation and explicit manual deployments still require review of the source revision and CI result.
+On the single-instance free API, the start command runs `alembic upgrade head` before Uvicorn. A migration failure prevents startup. FastAPI starts/stops the one-slot embedded worker with its app lifecycle. API liveness is the Render deploy probe; the full readiness endpoint checks PostgreSQL, Redis and a fresh worker heartbeat. Automatic deploys use `checksPass`; review the source revision and workflow status before sharing the demo.
 
-For an established or production database, take and verify protected snapshots first, use a separate migration identity/job, and remove the migrate-on-start command. Do not scale this startup pattern to multiple API instances. Keep application credentials separate from schema ownership. TLS, trusted ingress IP handling, large upload behavior and deployed resource limits still require verification. Proxy headers remain disabled; IP rate limits can group requests from a shared ingress. Do not enable arbitrary forwarded-header trust.
+The API and worker share a free web process, so a cold start delays both and memory/CPU are constrained. Do not scale API replicas with the embedded worker enabled. Local uploaded files can disappear independently from PostgreSQL records; Redis may reset queued work, rate-limit counters and sessions. Only use disposable synthetic data. The existing S3-backed `render.yaml` is the separate paid preview profile; neither profile alone proves banking production readiness.
 
 ## Verify after Apply
 
-1. Confirm all three application deployments are live and identify the deployed Git revision; review logs for migration/startup failures without exporting secrets or documents.
-2. Through the frontend HTTPS hostname, request `/api/health/live` and `/api/health`. Require HTTP 200 for both. Readiness checks PostgreSQL, Redis, private storage and a fresh worker heartbeat.
+1. Confirm both web services are live and identify the deployed Git revision; review logs for migration/startup failures without exporting secrets or documents.
+2. Through the frontend HTTPS hostname, request `/api/health/live` and `/api/health`. Require HTTP 200 for both. Readiness checks PostgreSQL, Redis and the embedded worker heartbeat; local storage is intentionally ephemeral.
 3. Sign up/sign in with a synthetic user. Confirm cookies are Secure, HttpOnly for the session, and confined to the frontend origin. Verify invalid/missing CSRF tokens fail and logout revokes the session.
-4. Use synthetic documents to upload, parse, inspect/download, approve an obligation, create/review a control, map it, review evidence/tests and assess deterministic gaps. AI extraction/mapping requests remain unavailable under the model budget hold; use the documented synthetic fixture only where disclosed.
-5. Verify a second tenant is denied access, failed-job retry works, object keys are private, and large/invalid uploads fail as expected.
-6. Verify protected operator metrics with the managed monitoring credential, arrange alert delivery, and exercise staging backups/restore and rollback. Upgrade datastores before claiming durable operation.
-7. Record deployment URLs, IDs, revision, CI run, checks and remaining failures in the completion runbook. Full submission/production blockers remain in [SUBMISSION_READINESS.md](SUBMISSION_READINESS.md).
+4. Use synthetic documents to upload, parse, inspect/download, approve an obligation, create/review a control, map it, review evidence/tests and assess deterministic gaps. Model execution stays off; use only the disclosed synthetic fixture for extraction demonstrations.
+5. Verify second-tenant denial, failed-job retry, CSRF rejection, logout and invalid/large upload handling.
+6. Record deployment URL, IDs, revision, CI run and checks in the completion runbook. Explain that free-service data is disposable and that the demo is not for banking production.
 
 ## Configuration validation
 
-The local blueprint passes the published [Render JSON schema](https://render.com/schema/render.yaml.json). The downloaded Render CLI is checksum verified and kept under ignored `output/`. Workspace-aware `render blueprints validate render.yaml -o json` cannot run in this session because no selected Render workspace/authentication is configured. Schema validation does not prove account availability, plan approval, secret correctness, container builds or a live service. Once connected, run CLI validation against the chosen workspace before Apply.
+The hackathon blueprint is validated against Render's published schema. Workspace-aware CLI validation is not available without a selected Render workspace. Schema validation does not prove resource availability, image builds or live service behavior. The owner reviews all resources in the Dashboard before deployment.

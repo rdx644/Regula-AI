@@ -41,7 +41,7 @@ def validate_document(content: bytes, filename: str | None) -> tuple[str, str]:
 
 
 class PrivateLocalStorage:
-    """Local, non-public storage with opaque keys and path-containment checks."""
+    """Local non-public storage for development and explicitly temporary demos."""
 
     def __init__(self, root: str | Path | None = None):
         configured_root = root if root is not None else settings.UPLOAD_STORAGE_DIR

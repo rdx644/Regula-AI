@@ -12,15 +12,17 @@ from app.core.monitoring import setup_logging, get_logger
 from app.db.session import SessionLocal
 from app.api.api import api_router
 
+embedded_worker = None
+
 # Setup structured logging
 setup_logging()
 logger = get_logger(__name__)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    openapi_url=None if settings.ENVIRONMENT.lower() in {"staging", "production"} else f"{settings.API_V1_STR}/openapi.json",
-    docs_url=None if settings.ENVIRONMENT.lower() in {"staging", "production"} else "/docs",
-    redoc_url=None if settings.ENVIRONMENT.lower() in {"staging", "production"} else "/redoc",
+    openapi_url=None if settings.ENVIRONMENT.lower() in {"demo", "staging", "production"} else f"{settings.API_V1_STR}/openapi.json",
+    docs_url=None if settings.ENVIRONMENT.lower() in {"demo", "staging", "production"} else "/docs",
+    redoc_url=None if settings.ENVIRONMENT.lower() in {"demo", "staging", "production"} else "/redoc",
     description="Agentic Regulatory Compliance & Control Intelligence Platform"
 )
 
@@ -35,7 +37,7 @@ if settings.ENABLE_RATE_LIMITING and settings.REDIS_URL:
 app.add_middleware(
     RateLimitMiddleware,
     redis_client=rate_limit_client,
-    fail_closed=settings.ENVIRONMENT.lower() in {"staging", "production"},
+    fail_closed=settings.ENVIRONMENT.lower() in {"demo", "staging", "production"},
 )
 
 # CORS middleware
@@ -56,11 +58,31 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.on_event("startup")
 async def startup_event():
+    global embedded_worker
+    if settings.RUN_EMBEDDED_WORKER:
+        import platform
+        import os
+        from uuid import uuid4
+        from app.services.queue import JobQueue, Worker
+        from app.workers.handlers import get_handlers
+
+        queue = JobQueue()
+        embedded_worker = Worker(
+            queue=queue,
+            worker_id=f"regulaai-worker-{settings.ENVIRONMENT}-{platform.node()}-{os.getpid()}-{uuid4().hex[:8]}",
+            handlers=get_handlers(),
+            poll_interval=1.0,
+            max_concurrent=settings.WORKER_MAX_CONCURRENT,
+        )
+        await embedded_worker.start()
+        logger.info("Embedded demo worker started", extra={"event": "worker_started"})
     logger.info("Application starting up", extra={"event": "startup"})
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
+    if embedded_worker:
+        await embedded_worker.stop()
     if rate_limit_client:
         await rate_limit_client.aclose()
     from app.services.queue import close_queue
@@ -115,8 +137,13 @@ async def health_check():
             storage_status = "private_encrypted_versioned"
         except Exception:
             storage_status = "unavailable_or_unsafe"
-    production = settings.ENVIRONMENT.lower() in {"staging", "production"}
-    ready = db_status == "connected" and (not production or (redis_status == "connected" and storage_status == "private_encrypted_versioned" and worker_status == "healthy"))
+    environment = settings.ENVIRONMENT.lower()
+    production = environment in {"staging", "production"}
+    demo = environment == "demo"
+    protected_services_ready = redis_status == "connected" and worker_status == "healthy"
+    if production:
+        protected_services_ready = protected_services_ready and storage_status == "private_encrypted_versioned"
+    ready = db_status == "connected" and (not (production or demo) or protected_services_ready)
     overall_status = "ok" if ready else "degraded"
     status_code = status.HTTP_200_OK if ready else status.HTTP_503_SERVICE_UNAVAILABLE
 

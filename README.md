@@ -9,7 +9,7 @@ RegulaAI connects regulatory source documents with obligations, internal control
 
 [Architecture](#architecture) · [Quick start](#quick-start) · [Deploy on Render](#deploy-on-render) · [Verification](#verification) · [Documentation](#documentation)
 
-> **Project status:** 104 local backend tests and five automated browser tests pass. GitHub CI and Render Blueprint validation passed at [source revision `9e0ca67`](https://github.com/rdx644/Regula-AI/commit/9e0ca676c6432321e6ae8003e4c81ec9884960d3). The repository includes a Render preview blueprint; a live deployment has not been verified. Submission and production acceptance remain incomplete. OpenAI execution is disabled pending an approved budget and any necessary data-transfer approval.
+> **Project status:** The target is a temporary public hackathon demo using synthetic data and free Render services. Web services sleep; local uploads and Redis data may be lost on restart, and free PostgreSQL expires after 30 days. This configuration is not approved for real bank data. OpenAI execution remains disabled. The separate S3-backed preview configuration is retained.
 
 ## Capabilities
 
@@ -28,7 +28,7 @@ Structured AI agents are implemented, but real golden-set evaluation, semantic c
 
 ## Architecture
 
-The application uses a Next.js workspace, a FastAPI service and a separate background worker. The browser sends same-origin `/api` requests through Next.js. PostgreSQL stores domain records and audit history, Redis coordinates jobs, and private S3 storage holds uploaded source files and evidence in staging.
+The logical application uses a Next.js workspace, a FastAPI service and a background worker. The browser sends same-origin `/api` requests through Next.js. PostgreSQL stores domain records and audit history, Redis coordinates jobs, and the application supports private S3 storage for durable deployments. The free hackathon profile runs the worker inside the API process and stores uploads on ephemeral local disk.
 
 ![RegulaAI application architecture: reviewer, Next.js, FastAPI, PostgreSQL, Redis, background worker, private S3 and disabled OpenAI integration](docs/assets/regulaai-architecture.svg)
 
@@ -44,7 +44,7 @@ Download the HTML and open it in a browser for source links, light/dark themes a
 | API | Python 3.12, FastAPI, Pydantic, SQLAlchemy |
 | Database | PostgreSQL 16, pgvector, Alembic migrations |
 | Jobs and workflows | Redis, asynchronous workers, LangGraph workflows |
-| File storage | Private local adapter for development; S3-compatible storage for staging |
+| File storage | Ephemeral local adapter for the hackathon demo; S3-compatible storage for durable deployments |
 | Model integration | OpenAI SDK, structured outputs and execution quotas; disabled by default |
 | Verification | pytest, Playwright, axe accessibility checks, GitHub Actions |
 | Packaging | Docker, Docker Compose, Node.js 22, Render Blueprint |
@@ -115,26 +115,15 @@ Open **http://localhost:3000** and create a synthetic account. The local API run
 
 ## Deploy on Render
 
-The root [render.yaml](render.yaml) defines the web workspace, API, worker, PostgreSQL and Redis. It uses Singapore for Render resources and an owner-supplied private S3 bucket.
+The [hackathon blueprint](render.hackathon.yaml) defines free web, API, PostgreSQL and Redis services in Singapore. The API starts a single embedded worker and uses temporary local upload storage; no S3 account is required. The separate [render.yaml](render.yaml) retains the S3-backed preview topology with a paid worker.
 
-1. Open [Create the RegulaAI Blueprint](https://dashboard.render.com/blueprint/new?repo=https://github.com/rdx644/Regula-AI), connect the repository, and select `main` with blueprint path `render.yaml`.
-2. Review all resources and approve the **paid Starter worker** before deployment.
-3. Enter the API settings below in Render's secure configuration. The bucket must already exist, with public access blocked, versioning enabled and default encryption configured.
-4. Select **Deploy Blueprint** and inspect the build, migration and service logs.
-5. After the frontend hostname is assigned, set `BACKEND_CORS_ORIGINS` to its exact HTTPS origin. Sync the blueprint and redeploy the API and worker so linked settings match.
-6. Open the frontend URL and require HTTP 200 from both `/api/health/live` and `/api/health` through that hostname. Full readiness checks the database, Redis, private storage and worker heartbeat.
+1. Open [Create a Render Blueprint](https://dashboard.render.com/blueprint/new?repo=https://github.com/rdx644/Regula-AI), connect the repository and branch `main`, then set the blueprint path to `render.hackathon.yaml`.
+2. Confirm every listed service uses the **Free** plan. This blueprint has no separate paid worker and does not require S3.
+3. Select **Deploy Blueprint**. Render generates application secrets and links the API, frontend, database and Redis settings automatically.
+4. Open the assigned frontend URL. Require HTTP 200 from both `/api/health/live` and `/api/health` through that hostname. Readiness checks PostgreSQL, Redis and the embedded worker.
+5. Create a synthetic account and use synthetic documents. Re-upload if a service restart clears local uploads.
 
-| Setting | Value to provide securely |
-| --- | --- |
-| `BACKEND_CORS_ORIGINS` | Exact frontend HTTPS origin; no wildcard |
-| `S3_BUCKET` | Approved private bucket name |
-| `AWS_REGION` | The bucket's region |
-| `AWS_ACCESS_KEY_ID` | Scoped deployment access key |
-| `AWS_SECRET_ACCESS_KEY` | Matching secret |
-
-Render generates application secrets and links internal database/Redis URLs. No OpenAI key is required while model execution is disabled. The frontend's API upstream is compiled during its build; changing the API hostname requires rebuilding the frontend.
-
-**Preview limits:** free web services sleep, free PostgreSQL expires after 30 days without managed backups, and free Key Value data is lost on restart. A background worker requires paid compute. Review [Render's free service limits](https://render.com/docs/free) and the [complete deployment guide](docs/RENDER_DEPLOYMENT.md) before applying the blueprint. Staging TLS, IAM, recovery, monitoring, rollback and capacity still need deployed evidence before production approval.
+Free web services sleep, free PostgreSQL expires after 30 days without managed backups, and free Key Value data can be lost on restart. Web/API filesystems are ephemeral. This profile is for a short synthetic demo. See [Render free service limits](https://render.com/docs/free) and the [complete Render guide](docs/RENDER_DEPLOYMENT.md). The separate S3-backed preview uses paid compute and requires an owner-provided bucket.
 
 ## Security and review controls
 
