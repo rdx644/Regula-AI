@@ -88,3 +88,6 @@ Code is not complete unless:
 - Live free Render rehearsal verified signup, workspace/demo creation, private parsing/source download, control/mapping/evidence/test review, actual gap worker, post-remediation private evidence/passing test and validated closure surviving reload.
 - Submission description, live link, judge sequence and synthetic inputs are in docs/HACKATHON_SUBMISSION.md. No contest submission, paid model call or infrastructure provisioning performed. Original full F3/D2/model/production gates remain incomplete; don't count eight navigation screens as eight accepted hackathon features.
 - Latest release/push/live checks are in docs/evidence/hackathon-submission.json; older evidence remains historical.
+
+- Feature release 4d7c2ce is pushed, CI/Blueprint pass, and all new workflows now pass on the live Render demo with reload persistence. Live axe has zero violations on all eight views and populated comparison/investigation; 390px fits. Live logout/signin, second-tenant403 and CSRF403 verified; architecture Pages returns200.
+- Follow-up browser regression covers changing workspaces then immediately reloading. Persist the selected organization synchronously, before slower workspace reads. No auth token is stored in localStorage.

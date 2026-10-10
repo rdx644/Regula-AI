@@ -40,7 +40,8 @@ The guide is a demonstration sequence, not a claim that eight complete hackathon
 - 114 backend tests against isolated PostgreSQL/Redis; source comparison, audit and tenant-denial tests included.
 - Five automated browser regression tests; actual parser/worker/storage/domain operations, with extraction alone replaced by a synthetic adapter.
 - Frontend lint, TypeScript production build and tested accessibility/mobile paths.
-- Live account/workspace/demo creation, private parsing/download, control/mapping/evidence/test review, gap execution and validated remediation closure.
+- Live account/workspace/demo creation, private parsing/download, control/mapping/evidence/test review, gap execution, validated remediation closure, literal comparison, scenario worker and guided investigation/audit. Live axe and 390px checks pass across all eight workspace views.
+- GitHub CI and Render Blueprint checks passed at feature revision `4d7c2ce`.
 - Detailed receipts: [submission verification](evidence/hackathon-submission.json), [earlier frontend verification](evidence/frontend-redesign.json).
 
 ## Limitations to disclose

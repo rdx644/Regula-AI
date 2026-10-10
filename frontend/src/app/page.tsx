@@ -225,7 +225,7 @@ export default function Home() {
       <div className="brand-lockup">Regula<span className="brand-light">AI</span></div>
       <p className="side-label">CURRENT WORKSPACE</p>
       <div className="org-select-wrap"><select aria-label="Organization" value={organizationId} disabled={busy || organizations.length === 0} onChange={event => {
-        const id = event.target.value; setOrganizationId(id); setMetrics(null); setMatrix([]); setQuery(""); setError(""); setLastUpdated("");
+        const id = event.target.value; localStorage.setItem(ORG_KEY, id); setOrganizationId(id); setMetrics(null); setMatrix([]); setQuery(""); setError(""); setLastUpdated("");
         void loadWorkspace(token, id).catch(reason => setError(errorMessage(reason)));
       }}>{organizations.length === 0 && <option value="">Choose your first workspace</option>}{organizations.map(org => <option key={org.id} value={org.id}>{org.name.startsWith("Demo Bank ") ? "Demo Bank · Basel III" : org.name}</option>)}</select><span aria-hidden="true">⌄</span></div>
       <button className="new-workspace" disabled={busy} onClick={() => setShowOrganizationForm(!showOrganizationForm)}>+ New workspace</button>

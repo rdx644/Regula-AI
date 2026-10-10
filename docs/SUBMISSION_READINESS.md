@@ -8,7 +8,7 @@ New review workflows add literal two-version comparison with saved candidate imp
 
 The governing plan's full F3/D2 acceptance and durable production gate remain incomplete. Golden predictions are still zero by explicit owner instruction. The free profile uses ephemeral local uploads, not S3; durable production infrastructure, cloud recovery and monitoring remain outside verified scope.
 
-Before these additions, [Main CI](https://github.com/rdx644/Regula-AI/actions/runs/38040141438) and [Render Blueprint CI](https://github.com/rdx644/Regula-AI/actions/runs/38040141433) passed at `fbef760`. Current release checks and live results are recorded in [hackathon-submission.json](evidence/hackathon-submission.json).
+Feature release `4d7c2ce` passed [Main CI](https://github.com/rdx644/Regula-AI/actions/runs/38042695087) and [Render Blueprint CI](https://github.com/rdx644/Regula-AI/actions/runs/38042695026). The added comparison/scenario/investigation workflows also pass on the live Render demo. Current release checks and live results are recorded in [hackathon-submission.json](evidence/hackathon-submission.json).
 
 ## Verified local evidence
 
@@ -92,7 +92,7 @@ Three additive migrations follow the previous `b2c3d4e5f6a7` head. Review every 
 | Secrets protected | Partial | Ignored secrets, regex scan, no client auth storage; managed deployment secrets unverified. |
 | Logs redacted | Partial | Safe validation/job/provider errors and log configuration; staging log collector not exercised. |
 | Rate limits exist | Verified locally | Redis protection tests, fail-closed production setting and tenant model quota test. Edge/proxy configuration open. |
-| Production: CI passes | Verified at published revision | Main CI and Render Blueprint CI passed at `fbef760` before these additions; latest release receipt preserves subsequent results. |
+| Production: CI passes | Verified at published revision | Main CI and Render Blueprint CI passed at `4d7c2ce`; live Render comparison/scenario/investigation verification also passes. |
 | Staging exists | Externally blocked | Free demo is live and rehearsed with synthetic data. Separate durable staging remains unverified. |
 | Production deployment works | Externally blocked | Free demo is reachable; this is not a durable production deployment. Production image/IAM/operational checks remain open. |
 | Backups exist | Partial | Local encrypted snapshot exists; managed scheduling/retention unconfigured. |

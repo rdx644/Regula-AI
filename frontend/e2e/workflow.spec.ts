@@ -96,6 +96,14 @@ test("invalid upload is rejected and cookie mutations require CSRF", async ({ pa
 test("another browser tenant cannot list the first tenant's workspace", async ({ page, browser }) => {
   await register(page);
   const organizationId = await page.getByRole("combobox", { name: "Organization" }).inputValue();
+  await page.getByRole("button", { name: "+ New workspace", exact: true }).click();
+  await page.getByLabel("Workspace name", { exact: true }).fill("Synthetic alternative workspace");
+  await page.getByRole("button", { name: "Create workspace", exact: true }).click();
+  await expect(page.getByRole("combobox", { name: "Organization" }).locator("option")).toHaveCount(2);
+  await page.getByRole("combobox", { name: "Organization" }).selectOption(organizationId);
+  // Selection must survive a reload before the slower workspace reads finish.
+  await page.reload();
+  await expect(page.getByRole("combobox", { name: "Organization" })).toHaveValue(organizationId);
   const context = await browser.newContext();
   try {
     const other = await context.newPage();

@@ -5,8 +5,20 @@
   "model_execution_enabled": false,
   "paid_model_requests": 0,
   "real_golden_predictions": 0,
-  "backend": { "passed": 114, "warnings": 28, "duration_seconds": 36.69, "database": "isolated PostgreSQL QA database", "migration_head": "f5a6b7c8d9e0" },
-  "frontend": { "lint": "passed", "production_build_and_typescript": "passed", "existing_browser_tests_passed": 5, "browser_duration": "1.6 minutes", "extraction_adapter": "disclosed synthetic fixture only" },
+  "backend": {
+    "passed": 114,
+    "warnings": 28,
+    "duration_seconds": 36.69,
+    "database": "isolated PostgreSQL QA database",
+    "migration_head": "f5a6b7c8d9e0"
+  },
+  "frontend": {
+    "lint": "passed",
+    "production_build_and_typescript": "passed",
+    "existing_browser_tests_passed": 5,
+    "browser_duration": "1.1 minutes, final run including immediate workspace reload regression",
+    "extraction_adapter": "disclosed synthetic fixture only"
+  },
   "added_local_browser_workflows": {
     "private_new_version_upload_and_actual_parser": "passed",
     "literal_diff_and_candidate_impact_draft": "passed",
@@ -21,7 +33,7 @@
   },
   "live_rehearsal": {
     "url": "https://regulaai-hackathon-web.onrender.com/",
-    "base_revision": "fbef760",
+    "base_revision": "4d7c2ce for new review workflows; earlier core rehearsal at fbef760",
     "web_health_liveness_and_readiness": "200",
     "account_workspace_and_demo_creation": "passed",
     "private_upload_actual_parsing_and_authenticated_download": "passed",
@@ -30,7 +42,16 @@
     "remediation_approval_and_start": "passed",
     "post_remediation_private_evidence_and_passing_reviewed_test": "passed",
     "validated_completion_and_reload_persistence": "passed",
-    "new_review_screen_deployment": "pending publication and live verification"
+    "new_review_screen_deployment": "passed on Render",
+    "new_version_parser_literal_diff_and_saved_candidate_impact": "passed",
+    "scenario_worker_and_reload_persistence": "passed",
+    "guided_investigation_citations_and_audit": "passed",
+    "signin_logout_and_session_persistence": "passed",
+    "second_tenant_access_denied": 403,
+    "missing_csrf_mutation_denied": 403,
+    "all_eight_views_axe_violations": 0,
+    "populated_comparison_and_investigation_axe_violations": 0,
+    "all_eight_views_fit_390px": true
   },
   "prior_remote_checks": {
     "ci": "https://github.com/rdx644/Regula-AI/actions/runs/38040141438",
@@ -45,5 +66,24 @@
     "Free Render hosting uses ephemeral local uploads and queue data; no S3 in the hackathon profile.",
     "No measured F3/D2 or durable production certification; no contest submission performed.",
     "Five previously disclosed high development-tool dependency findings remain open."
-  ]
+  ],
+  "verified_feature_revision": "4d7c2ce0e62db16f3bb1cf33bdaa4c20bf229fba",
+  "remote_checks": {
+    "revision": "4d7c2ce0e62db16f3bb1cf33bdaa4c20bf229fba",
+    "ci": "https://github.com/rdx644/Regula-AI/actions/runs/38042695087",
+    "render_blueprint": "https://github.com/rdx644/Regula-AI/actions/runs/38042695026",
+    "conclusion": "success"
+  },
+  "architecture_pages": {
+    "url": "https://rdx644.github.io/Regula-AI/architecture/",
+    "http_status": 200
+  },
+  "follow_up_fix": "Workspace selection is saved synchronously before loading data; existing browser regression verifies immediate reload persistence.",
+  "dependency_recheck": {
+    "high_dev_findings": 5,
+    "runtime_vulnerabilities": 0,
+    "braces_latest_published": "3.0.3",
+    "compatible_patch_available": false,
+    "disposition": "open; no security waiver or framework downgrade"
+  }
 }
