@@ -1,6 +1,6 @@
 # Reproducible demo and submission draft
 
-**Draft for owner review; not published or submitted.** This checkout does not yet meet the governing plan's final submission or production gate. The F3/D2 targets remain targets.
+**Submission material prepared; the owner submits it.** See [the hackathon package](HACKATHON_SUBMISSION.md) for the live link, judge sequence and synthetic files. The free, unpaid prototype is demonstrable; the governing plan's full F3/D2 and production gates remain incomplete.
 
 ## Replay the tested synthetic browser workflow
 
@@ -28,13 +28,15 @@ The **Load demo scenario** endpoint creates a private user-specific prepared ten
 
 Current screenshot: `docs/evidence/review-workflow.png`. The final automated run passed five tests, including source/control/evidence/mapping review and accessibility. It demonstrates the current synthetic/manual scope.
 
-The exact plan section 43 sequence still requires a reviewed two-version semantic-change/impact scenario, real remediation recommendation and validation closure, a product scenario report, and an investigation question with a grounded answer/audit trace. Those steps must remain labelled incomplete. The persisted bounded scenario service has backend evidence but no complete product simulation UI demo.
+Live rehearsal on 2026-10-10 verified signup, workspace/demo creation, private source parsing/download, control and mapping approvals, private evidence review, passing tests, actual gap worker and post-remediation evidence/test-backed closure with reload persistence. New local browser checks also verify literal version comparison/candidate impact drafts, saved scenario worker results and guided investigation citations/audit events. All eight workspace views fit 390px and pass axe, including populated comparison/investigation results.
+
+These added workflows are deliberately bounded and unpaid. Literal diff is not semantic regulatory interpretation; investigation is structured lookup, not autonomous planning. Prepared records and manually reviewed tests do not establish measured model accuracy. The full model-dependent section 43 sequence remains unverified.
 
 ## Submission text draft
 
-> RegulaAI connects regulatory sources, reviewed obligations, internal controls, private evidence, test outcomes and compliance findings in a tenant-scoped workspace. It uses structured proposals and human review, deterministic gap/risk calculations, durable background jobs and persisted audit traces. The local synthetic demonstration exercises actual API/database/worker/storage paths. Its extraction adapter is explicitly synthetic; real model reliability evaluation and production deployment are pending owner approvals and operational verification.
+> RegulaAI connects regulatory sources, reviewed obligations, internal controls, private evidence, test outcomes and compliance findings in a tenant-scoped workspace. It uses structured proposals and human review, deterministic gap/risk calculations, durable background jobs and persisted audit traces. The local synthetic demonstration exercises actual API/database/worker/storage paths. Its extraction adapter is explicitly synthetic; real model reliability evaluation and durable production operations remain pending. The free Render demonstration has been exercised using synthetic data, including validated remediation closure.
 
-Exclude claims of eight/twelve fully validated hackathon features, D2 reliability, autonomous legal interpretation, verified regulatory impact, production readiness and live deployment until their acceptance evidence exists. Use the F01-F14 matrix in `SUBMISSION_READINESS.md` when preparing any later claims.
+Exclude claims of eight/twelve fully validated hackathon features, D2 reliability, autonomous legal interpretation, verified regulatory impact, production readiness until their acceptance evidence exists. The live free-demo link is verified within the recorded rehearsal scope. Use the F01-F14 matrix in `SUBMISSION_READINESS.md` when preparing any later claims.
 
 ## Review package
 

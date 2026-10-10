@@ -1,0 +1,7 @@
+Synthetic regulation for demonstration only
+Section 1
+The synthetic bank shall review its capital ratio every month.
+Section 2
+The reviewer shall retain a signed synthetic review log.
+Section 3
+The reviewer shall record the review date in the synthetic log.

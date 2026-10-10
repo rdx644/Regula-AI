@@ -25,8 +25,20 @@ from app.schemas.change import (
     ImpactAnalysisResponse,
 )
 from app.services.queue import get_queue, create_job, JobPriority
+from app.schemas.workspace import TextComparisonResponse
 
 router = APIRouter()
+
+
+@router.post("/compare-text", response_model=TextComparisonResponse)
+def compare_source_text(*, payload: ChangeDetectionRequest, db: Session = Depends(deps.get_db),
+                        current_user: User = Depends(deps.get_current_user)):
+    from app.services.workspace_review import compare_text
+    document = db.query(RegulatoryDocument).filter(RegulatoryDocument.id == payload.document_id).first()
+    if not document:
+        raise HTTPException(404, "Document not found")
+    deps.verify_membership(db, current_user, document.organization_id, required_permission=Permission.REGULATION_UPDATE)
+    return TextComparisonResponse(**compare_text(db, document, payload.old_version_id, payload.new_version_id, current_user.id))
 
 
 # â”€â”€ Regulatory Change Endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

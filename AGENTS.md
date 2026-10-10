@@ -79,3 +79,12 @@ Code is not complete unless:
 - Added authenticated capability discovery, upload limits, unavailable-model states, workspace creation, source download, working findings/remediation view, request cancellation and automatic terminal-job refresh.
 - Synthetic demo source pages and initial applicability now match the workflow contract. Existing demo review decisions are preserved; applicability can be explicitly reopened by a reviewer.
 - Latest isolated backend verification: 110 passed, 27 warnings. All five automated browser tests, lint, TypeScript and production build pass; frontend runtime audit reports zero vulnerabilities. All five workspace views pass manual axe checks and fit a 390px viewport. See `docs/evidence/frontend-redesign.json` for exact browser/build results and live deployment limits.
+
+## Hackathon submission completion (2026-10-10)
+- 114 isolated backend tests pass (28 warnings, 36.69s); five existing browser tests pass (1.6m); lint and TypeScript production build pass.
+- Added bounded literal source diff, version/line citations and persisted candidate impact drafts; unchanged source has no draft. Same-source comparisons serialize and identical comparisons reuse the saved report. No semantic inference or baseline mutation.
+- Added scenario UI using existing actual worker/snapshot persistence and exports; mapped control outage and bounded illustrative multipliers only. Added guided tenant-scoped investigation with recorded source citations and audit events; no autonomous planning/model call.
+- Local CLI browser checks verified all added workflows and reload persistence. Axe has zero violations on all eight workspace views and populated comparison/investigation results; 390px layout fits.
+- Live free Render rehearsal verified signup, workspace/demo creation, private parsing/source download, control/mapping/evidence/test review, actual gap worker, post-remediation private evidence/passing test and validated closure surviving reload.
+- Submission description, live link, judge sequence and synthetic inputs are in docs/HACKATHON_SUBMISSION.md. No contest submission, paid model call or infrastructure provisioning performed. Original full F3/D2/model/production gates remain incomplete; don't count eight navigation screens as eight accepted hackathon features.
+- Latest release/push/live checks are in docs/evidence/hackathon-submission.json; older evidence remains historical.

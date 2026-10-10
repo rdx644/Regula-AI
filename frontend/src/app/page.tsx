@@ -6,12 +6,15 @@ import RegulationIntake from "./RegulationIntake";
 import ComplianceReview, { ReviewRow } from "./ComplianceReview";
 import ControlWorkspace from "./ControlWorkspace";
 import GapWorkspace from "./GapWorkspace";
+import ChangeWorkspace from "./ChangeWorkspace";
+import ScenarioWorkspace from "./ScenarioWorkspace";
+import InvestigationWorkspace from "./InvestigationWorkspace";
 import { api, ApiError, errorMessage } from "../lib/api";
 import { Capabilities, CapabilitiesContext } from "../lib/capabilities";
 
 const TraceScene = dynamic(() => import("./TraceScene"), { ssr: false });
 const ORG_KEY = "regulaai.organization-id";
-type View = "overview" | "matrix" | "library" | "controls" | "gaps";
+type View = "overview" | "matrix" | "library" | "controls" | "gaps" | "changes" | "scenarios" | "investigation";
 type User = { id: string; full_name: string; email: string };
 type Organization = { id: string; name: string };
 type MetricGroup = { total: number; approved?: number; valid?: number; open?: number; approval_rate?: number; validation_rate?: number };
@@ -29,6 +32,9 @@ const views: { id: View; label: string; symbol: string; description: string }[] 
   { id: "controls", label: "Control library", symbol: "03", description: "Build reviewed controls, link evidence and record tests." },
   { id: "matrix", label: "Compliance matrix", symbol: "04", description: "Follow each obligation through its control and evidence." },
   { id: "gaps", label: "Gap & remediation", symbol: "05", description: "Prioritize findings and move owned actions toward closure." },
+  { id: "changes", label: "Version comparison", symbol: "06", description: "Inspect literal source changes and candidate impact drafts." },
+  { id: "scenarios", label: "What-if scenarios", symbol: "07", description: "Explore a control outage without changing your baseline." },
+  { id: "investigation", label: "Investigation & audit", symbol: "08", description: "Query recorded workspace facts and follow their audit trail." },
 ];
 function Pill({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "green" | "amber" | "red" }) {
   return <span className={`pill pill-${tone}`}>{children}</span>;
@@ -248,6 +254,9 @@ export default function Home() {
           {view === "library" && <RegulationIntake key={organizationId} token={token} organizationId={organizationId} onComplete={refresh} />}
           {view === "controls" && <ControlWorkspace key={organizationId} token={token} organizationId={organizationId} onComplete={refresh} />}
           {view === "gaps" && <GapWorkspace key={organizationId} token={token} organizationId={organizationId} onComplete={refresh} />}
+          {view === "changes" && <ChangeWorkspace key={organizationId} token={token} organizationId={organizationId} />}
+          {view === "scenarios" && <ScenarioWorkspace key={organizationId} token={token} organizationId={organizationId} />}
+          {view === "investigation" && <InvestigationWorkspace key={organizationId} token={token} organizationId={organizationId} />}
         </>}
         <footer className="page-footer"><span>RegulaAI / Compliance intelligence</span><span>Source linked · Tenant scoped · Human governed</span></footer>
       </div>

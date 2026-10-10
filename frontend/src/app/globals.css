@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+.review-workspace { display: grid; gap: 24px; min-width: 0; }
+.review-select { display: grid; gap: 8px; max-width: 620px; margin-top: 24px; font-weight: 600; }
+.review-select select { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #cfd6c9; border-radius: 6px; background: #fffefb; color: var(--ink); }
+.diff-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.diff-grid pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 400px; overflow: auto; font-size: 13px; padding: 12px; background: #f0f3ef; }
+.review-workspace .source-review { overflow-wrap: anywhere; }
+.audit-list { display: grid; gap: 16px; padding-left: 24px; }
+.audit-list span { display: block; margin-top: 4px; }
+@media (max-width: 720px) { .diff-grid { grid-template-columns: 1fr; } }
+
 :root { --ink:#20352d; --muted:#59675f; --line:#dedfd6; --paper:#f5f4ee; --green:#27664e; --deep-green:#183e31; --mint:#eaf1e8; --serif:"Newsreader Variable",Georgia,serif; --sans:"Manrope Variable",sans-serif; }
 * { box-sizing:border-box; }
 html,body { min-height:100%; }

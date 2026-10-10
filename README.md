@@ -21,7 +21,9 @@ RegulaAI connects regulatory source documents with obligations, internal control
 | Evidence and testing | Private evidence access, validation and reviewed test results |
 | Gaps and risk | Deterministic assessment using reviewed records and stated scoring rules |
 | Remediation | Reviewed lifecycle with completion guards tied to current evidence and tests |
+| Version comparison | Exact text differences with version/line references and saved candidate impact drafts |
 | Scenarios | Isolated persisted what-if snapshots without changing the underlying landscape |
+| Investigation | Guided workspace queries with recorded citations and an audit event; no model inference |
 | Background execution | Tenant-scoped jobs, deduplication, leases, retries and persisted agent traces |
 
 Structured AI agents are implemented, but real golden-set evaluation, semantic change/impact acceptance and some product capabilities remain open. The synthetic extraction adapter used by browser tests does not establish model quality. Submission and production gates are incomplete. See the [feature and readiness matrix](docs/SUBMISSION_READINESS.md) for the exact scope and remaining owner actions.
@@ -67,6 +69,11 @@ The [synthetic demo guide](docs/DEMO_AND_SUBMISSION.md) makes the tested path re
 - **Control library**: propose and approve controls, record manual mappings, upload and inspect evidence, and save reviewed tests.
 - **Compliance matrix**: search clauses and controls, inspect source citations, record applicability, approve mappings and assess deterministic gaps.
 - **Gap & remediation**: filter findings, propose a manual action plan, assign an owner and advance reviewed plans. Completion requires current evidence and a passing post-remediation test.
+- **Version comparison**: privately upload and parse another source version, inspect literal differences and save candidate control/policy impact drafts for human review.
+- **What-if scenarios**: simulate a mapped control outage with bounded illustrative risk assumptions, retain snapshots and export results.
+- **Investigation & audit**: ask guided questions about recorded gaps, mappings, evidence and control coverage; inspect citations and recent audit events.
+
+The [hackathon submission package](docs/HACKATHON_SUBMISSION.md) includes the live link, synthetic input files, a judge demonstration sequence and an accurate project description.
 
 After signing in, create a named workspace or select **Load demo scenario** to use the synthetic Basel III dataset. New demo obligations include applicability and synthetic source pages. For older demo records marked `approved / uncertain`, open **Review source**, choose **Reopen obligation review**, and explicitly approve the applicability before assessing gaps. Reloading the demo repairs missing synthetic source pages without changing previous decisions. Organization changes clear the previous view and cancel obsolete requests. Completed jobs refresh the relevant results automatically.
 
@@ -136,7 +143,7 @@ The [hackathon blueprint](render.hackathon.yaml) defines free web, API, PostgreS
 1. Open [Create a Render Blueprint](https://dashboard.render.com/blueprint/new?repo=https://github.com/rdx644/Regula-AI), connect the repository and branch `main`, then set the blueprint path to `render.hackathon.yaml`.
 2. Confirm every listed service uses the **Free** plan. This blueprint has no separate paid worker and does not require S3.
 3. Select **Deploy Blueprint**. Render generates application secrets and links the API, frontend, database and Redis settings automatically.
-4. Open the assigned frontend URL. Verify HTTP 200 from `/api/health/live` and `/api/health` through that hostname. Readiness checks PostgreSQL, Redis and the embedded worker. The web service has been reachable, but API readiness was still failing during the latest local frontend review; complete these checks before sharing the demo.
+4. Open the assigned frontend URL. Verify HTTP 200 from `/api/health/live` and `/api/health` through that hostname. Readiness checks PostgreSQL, Redis and the embedded worker. The live free demo passed both checks on 2026-10-10 and a synthetic signed-in rehearsal, including private parsing, reviews and validated remediation closure. Check again immediately before presenting because free services can sleep or restart.
 5. Create a synthetic account and use synthetic documents. Re-upload if a service restart clears local uploads.
 
 Free web services sleep, free PostgreSQL expires after 30 days without managed backups, and free Key Value data can be lost on restart. Web/API filesystems are ephemeral. This profile is for a short synthetic demo. See [Render free service limits](https://render.com/docs/free) and the [complete Render guide](docs/RENDER_DEPLOYMENT.md). The separate S3-backed preview uses paid compute and requires an owner-provided bucket.
@@ -175,17 +182,17 @@ Before browser verification, install Chromium with `npx playwright install chrom
 
 | Evidence | Observed result |
 | --- | --- |
-| Local backend suite | 110 passing tests, including PostgreSQL/Redis authorization, worker and frontend capability checks (recorded 2026-10-10) |
-| Automated browser suite | Five passing tests; axe, keyboard and narrow-screen checks on covered pages. Manual axe checks also pass on all five signed-in views (recorded 2026-10-10) |
+| Local backend suite | 114 passing tests, including PostgreSQL/Redis authorization, source comparison, investigation audit and worker checks (recorded 2026-10-10) |
+| Automated browser suite | Five passing tests; axe, keyboard and narrow-screen checks on covered pages. Manual axe checks also pass on all eight signed-in views, including populated comparison and investigation results (recorded 2026-10-10) |
 | Database migrations | Head `f5a6b7c8d9e0`; fresh migrations and drift checks pass |
 | Frontend | Lint, type checking and production build pass (recorded 2026-10-10) |
-| GitHub CI | Main CI and Render Blueprint validation passed at source revision `9e0ca67`; see the workflow badges above for current status |
+| GitHub CI | Main CI and Render Blueprint validation passed at source revision `fbef760` before these additions; see the workflow badges above for current status |
 | GitHub Pages | The workflow requires Pages to be enabled with **GitHub Actions** under **Settings > Pages**; until then, the interactive URL is unavailable |
-| Render Blueprint CI | [Passing run at `9e0ca67`](https://github.com/rdx644/Regula-AI/actions/runs/37998241179) |
+| Render Blueprint CI | [Passing run at `fbef760`](https://github.com/rdx644/Regula-AI/actions/runs/38040141433) |
 | Architecture diagram | Local validation, delivery, artifact and browser gates pass; light/dark visual review completed. These checks do not verify a live deployment. |
 | Real model evaluation | Not run: zero predictions; ten golden inputs await budget and label review |
 
-[Frontend redesign verification](docs/evidence/frontend-redesign.json) records the latest workflow and visual checks. [Local verification evidence](docs/evidence/verification.json) records the earlier engineering audit and its limitations. These results establish the covered behavior, not production capacity, comprehensive penetration testing or regulatory model reliability. Current badges show the latest workflow state; the run links above preserve the observed source-revision evidence.
+[Submission verification](docs/evidence/hackathon-submission.json) records the latest checks and live rehearsal; [frontend redesign verification](docs/evidence/frontend-redesign.json) preserves the earlier review. [Local verification evidence](docs/evidence/verification.json) records the earlier engineering audit and its limitations. These results establish the covered behavior, not production capacity, comprehensive penetration testing or regulatory model reliability. Current badges show the latest workflow state; the run links above preserve the observed source-revision evidence.
 
 ## Repository layout
 

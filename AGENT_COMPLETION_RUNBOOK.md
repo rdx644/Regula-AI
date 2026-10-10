@@ -287,3 +287,13 @@ This table supersedes the historical 43-test execution record below. Complete re
 - **Result:** Local code checks pass; final deployment/production/submission gate remains incomplete. Project Git root/origin initialized; no commit/push.
 - **Evidence:** `docs/evidence/verification.json`; source scan/change manifest; current AGENTS.md and this log.
 - **Unresolved items:** All remaining owner/external/software gates in SUBMISSION_READINESS.md. Do not certify production or submission readiness.
+
+## Free hackathon submission execution record (2026-10-10)
+
+This record supersedes earlier statements about missing product scenario/investigation screens, unverified live hosting and unavailable Git publication. It does not supersede the owner instruction to keep model execution unpaid.
+
+- Tasks 2-4, 6-7: latest isolated backend suite 114 passed (28 warnings, 36.69s); five automated browser tests passed (1.6m), frontend lint/TypeScript build passed. Additional CLI browser checks cover literal comparison/candidate impact persistence, actual scenario worker and guided investigation/audit. Eight workspace views and populated result views pass axe and fit 390px. Tenant denial and bounded input tests cover the new APIs.
+- Task 5: zero paid calls and zero real golden predictions; explicitly blocked by the owner's budget instruction. No fixture answers counted as model evidence.
+- Tasks 8-10: existing free Render demo now passes live health and a synthetic signed-in rehearsal, including private parsing/download and reviewed control/evidence/test/mapping actions. Durable S3-backed infrastructure, cloud recovery/monitoring/capacity and production approval remain outside this free-demo scope. No new provisioning performed.
+- Task 11: prepared docs/HACKATHON_SUBMISSION.md, judge sequence and fictional version/evidence inputs. Live gap worker and validated remediation closure passed with post-start private evidence and a passing reviewed test; closure survives reload. New local review/scenario/investigation product paths pass. Semantic regulatory impact and autonomous legal investigation are not claimed. No public contest submission performed.
+- Task 12: the disclosed unpaid prototype package is reviewable. The original full F3/D2 and production acceptance gates remain incomplete. Latest release and live receipt: docs/evidence/hackathon-submission.json.

@@ -14,8 +14,17 @@ from app.schemas.intelligence import (
 )
 from app.services.queue import get_queue, create_job, JobPriority
 from app.services.compliance import assessment_revision
+from app.schemas.workspace import InvestigationRequest, InvestigationResponse
 
 router = APIRouter()
+
+@router.post("/investigate", response_model=InvestigationResponse)
+def investigate_workspace(*, payload: InvestigationRequest, db: Session = Depends(deps.get_db),
+                          current_user: User = Depends(deps.get_current_user)):
+    from app.services.workspace_review import investigate
+    deps.verify_membership(db, current_user, payload.organization_id, required_permission=Permission.REGULATION_READ)
+    deps.verify_membership(db, current_user, payload.organization_id, required_permission=Permission.AUDIT_READ)
+    return investigate(db, payload.organization_id, current_user.id, payload.question)
 
 
 @router.post("/cross-regulation", response_model=CrossRegulationRunResponse, status_code=status.HTTP_202_ACCEPTED)
