@@ -30,6 +30,18 @@ The demo environment sets Secure session cookies, CSRF protection, explicit HTTP
 
 The browser uses relative `/api` calls. Next.js rewrites them to the API service, preserving one browser origin for the HttpOnly session and CSRF cookies. The public API origin is compiled into the frontend; changing it requires rebuilding the frontend. No backend credential is passed as a frontend build argument. See [Render Docker environment translation](https://render.com/docs/docker).
 
+The proxy preserves trailing slashes: `/api/users/` and `/api/organizations/` must reach FastAPI with their slash intact. Next.js automatic slash redirects are disabled, and separate rewrite patterns preserve both forms. A frontend rebuild is required for this routing change.
+
+### Signup/sign-in returns 500 or 502
+
+1. Check the web service's `/api/health/live` and `/api/health`. A working homepage alone does not establish that authentication is available.
+2. Open the API service's public URL from its Render Dashboard and check the same paths directly. Free services can need time to wake up. If direct liveness remains unavailable, inspect API **Logs** and **Events** for startup, migration, restart or memory errors.
+3. If direct API health works but the web proxy fails, confirm the web service's `API_PROXY_ORIGIN` exactly matches the API's HTTPS origin (no `/api` suffix). Save the setting and rebuild the web service, because rewrites are compiled at build time.
+4. If liveness works but readiness reports a disconnected database or Redis, verify the API references the active resources' internal connection strings. Inspect migration logs; do not reset or drop the database to troubleshoot.
+5. If both health checks pass but signup still returns 500, capture the API error type and request ID at the failure time. Do not share credentials, cookies, SQL parameters or connection strings.
+
+Deployment incident check on 2026-10-10: `https://regulaai-hackathon-web.onrender.com/` returned HTTP 200, while proxied health endpoints returned HTTP 502. The API hostname declared in the blueprint timed out on repeated checks. Signup's slash URL also returned a Next.js 308 redirect, prompting the slash-preservation correction. The API availability failure and reported authentication errors require runtime logs before a root cause or live recovery can be confirmed.
+
 On the single-instance free API, the start command runs `alembic upgrade head` before Uvicorn. A migration failure prevents startup. FastAPI starts/stops the one-slot embedded worker with its app lifecycle. API liveness is the Render deploy probe; the full readiness endpoint checks PostgreSQL, Redis and a fresh worker heartbeat. Automatic deploys use `checksPass`; review the source revision and workflow status before sharing the demo.
 
 The API and worker share a free web process, so a cold start delays both and memory/CPU are constrained. Do not scale API replicas with the embedded worker enabled. Local uploaded files can disappear independently from PostgreSQL records; Redis may reset queued work, rate-limit counters and sessions. Only use disposable synthetic data. The existing S3-backed `render.yaml` is the separate paid preview profile; neither profile alone proves banking production readiness.

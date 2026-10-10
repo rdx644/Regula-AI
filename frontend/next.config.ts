@@ -15,8 +15,15 @@ if (apiProxyOrigin) {
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // FastAPI collection routes require their trailing slash. Keep it through
+  // both Next.js normalization and the external rewrite to avoid redirects
+  // outside the browser's same-origin cookie transport.
+  skipTrailingSlashRedirect: true,
   async rewrites() {
     return apiProxyOrigin ? [{
+      source: "/api/:path*/",
+      destination: `${new URL(apiProxyOrigin).origin}/api/:path*/`,
+    }, {
       source: "/api/:path*",
       destination: `${new URL(apiProxyOrigin).origin}/api/:path*`,
     }] : [];
