@@ -73,3 +73,9 @@ Code is not complete unless:
 - `render.hackathon.yaml` is the separate all-free, synthetic-data demo profile. It runs one embedded worker and ephemeral local uploads; it does not satisfy durable S3-backed production gates. Keep `render.yaml` as the S3-backed preview profile.
 - **Submission and production gates remain incomplete**: real golden reliability, full semantic change/impact/remediation/investigation demo, F3/D2 claim, development dependency disposition, release-image verification, live staging/TLS/IAM/alerts/retention/backup/rollback and production approval.
 - Source-of-truth evidence: `docs/SUBMISSION_READINESS.md`, `docs/evidence/verification.json`, `AGENT_COMPLETION_RUNBOOK.md`; operational/security/evaluation/demo details are linked there. Never promote partial/blocked gates to complete based on fixture output or local tests alone.
+
+## Frontend refinement (2026-10-10)
+- Text wordmark replaces the homepage letter icon. Three.js introduction is lazy, finite, paused offscreen and disabled for reduced motion.
+- Added authenticated capability discovery, upload limits, unavailable-model states, workspace creation, source download, working findings/remediation view, request cancellation and automatic terminal-job refresh.
+- Synthetic demo source pages and initial applicability now match the workflow contract. Existing demo review decisions are preserved; applicability can be explicitly reopened by a reviewer.
+- Latest isolated backend verification: 110 passed, 27 warnings. All five automated browser tests, lint, TypeScript and production build pass; frontend runtime audit reports zero vulnerabilities. All five workspace views pass manual axe checks and fit a 390px viewport. See `docs/evidence/frontend-redesign.json` for exact browser/build results and live deployment limits.

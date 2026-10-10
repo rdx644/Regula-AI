@@ -21,6 +21,25 @@ from app.models.change import RegulatoryChange, ImpactAssessment, Simulation
 router = APIRouter()
 
 
+def demo_source_pages(raw_text, obligations):
+    """Build disclosed synthetic pages using only quotes present in the source."""
+    if not obligations:
+        return []
+    page_count = max(obligation.source_page or 1 for obligation in obligations)
+    if not 1 <= page_count <= 100:
+        return []
+    pages = [""] * page_count
+    for obligation in obligations:
+        quote = obligation.source_text_snippet or ""
+        if not quote or quote not in raw_text:
+            return []
+        index = (obligation.source_page or 1) - 1
+        if index < 0:
+            return []
+        pages[index] += f"{obligation.source_section}: {quote}\n"
+    return pages
+
+
 @router.post("/demo/seed", status_code=status.HTTP_201_CREATED)
 def seed_demo_data(
     *,
@@ -46,6 +65,21 @@ def seed_demo_data(
             RegulatoryDocument.title == "Basel III: Capital Requirements",
         ).first()
         if existing_regulation:
+            # Repair missing synthetic page context without changing decisions.
+            versions = db.query(RegulatoryVersion).filter(
+                RegulatoryVersion.document_id == existing_regulation.id
+            ).all()
+            for existing_version in versions:
+                if existing_version.source_pages:
+                    continue
+                existing_obligations = db.query(RegulatoryObligation).filter(
+                    RegulatoryObligation.version_id == existing_version.id,
+                    RegulatoryObligation.organization_id == org.id,
+                ).all()
+                pages = demo_source_pages(existing_version.raw_text or "", existing_obligations)
+                if pages:
+                    existing_version.source_pages = json.dumps(pages)
+            db.commit()
             return {
                 "message": "Demo data already exists",
                 "already_seeded": True,
@@ -196,13 +230,16 @@ Section 56: Banks shall conduct stress testing at least annually and report resu
             source_page=obl_data["source_page"],
             source_text_snippet=obl_data["text"],
             confidence=0.95,
-            extraction_model="gpt-4o-mini",
+            extraction_model="synthetic-fixture",
+            applicability="conditional" if obl_data["condition"] else "applicable",
             status="approved",
         )
         db.add(obl)
         obligation_objects.append(obl)
     db.flush()
     
+    version.source_pages = json.dumps(demo_source_pages(version.raw_text, obligation_objects))
+
     # 3. Create Policy
     policy = Policy(
         organization_id=org_id,

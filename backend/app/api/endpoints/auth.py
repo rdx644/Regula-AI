@@ -69,3 +69,14 @@ def logout(request: Request, response: Response, db: Session = Depends(deps.get_
     response.delete_cookie(deps.SESSION_COOKIE, path="/", secure=secure, httponly=True, samesite="lax")
     response.delete_cookie(deps.CSRF_COOKIE, path="/", secure=secure, httponly=False, samesite="lax")
     return {"status": "signed_out"}
+
+
+@router.get("/capabilities")
+def get_capabilities(current_user: User = Depends(deps.get_current_user)) -> Any:
+    """Expose feature availability and upload limits without exposing credentials."""
+    return {
+        "model_execution_enabled": settings.MODEL_EXECUTION_ENABLED and bool(settings.OPENAI_API_KEY),
+        "synthetic_extraction_enabled": settings.BROWSER_EXTRACTION_FIXTURE and settings.ENVIRONMENT.lower() == "test",
+        "max_upload_bytes": settings.MAX_UPLOAD_BYTES,
+        "ephemeral_uploads": settings.STORAGE_BACKEND.lower() == "local",
+    }

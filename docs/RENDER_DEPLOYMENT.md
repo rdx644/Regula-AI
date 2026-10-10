@@ -60,3 +60,12 @@ The API and worker share a free web process, so a cold start delays both and mem
 ## Configuration validation
 
 The hackathon blueprint is validated against Render's published schema. Workspace-aware CLI validation is not available without a selected Render workspace. Schema validation does not prove resource availability, image builds or live service behavior. The owner reviews all resources in the Dashboard before deployment.
+
+
+## Frontend workspace update (2026-10-10)
+
+Redeploy both the API and web services after pulling the frontend redesign. The web now reads the authenticated `/api/auth/capabilities` endpoint to display model availability and the upload limit. An older API will return 404 for this endpoint.
+
+For the free API service, set the Docker Command to `python /app/start_render.py` without surrounding quotes and deploy the latest source. The script runs migrations, then binds Uvicorn to Render's assigned port. Set the web service's `API_PROXY_ORIGIN` to the API service's public origin, without `/api` at the end. Keep `NEXT_PUBLIC_API_URL=/api` and `MODEL_EXECUTION_ENABLED=false`.
+
+Once the API is healthy, open the web app and load the synthetic demo. For existing obligations with uncertain applicability, review the source, reopen the obligation decision and approve applicability explicitly before gap assessment. Reloading the demo restores missing synthetic page context; prior review decisions are preserved.

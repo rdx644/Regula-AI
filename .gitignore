@@ -39,3 +39,6 @@ frontend/test-results/
 .archify/*/*
 !.archify/*/candidate.json
 !.archify/*/*.html
+
+# Browser CLI session artifacts
+.playwright-cli/

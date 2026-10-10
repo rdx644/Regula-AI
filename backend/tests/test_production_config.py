@@ -42,3 +42,8 @@ def test_production_settings_require_explicit_https_hosts_and_private_storage():
 def test_production_configuration_rejects_unsafe_defaults(overrides):
     with pytest.raises(ValidationError):
         valid_production_settings(**overrides)
+
+
+def test_browser_extraction_fixture_cannot_be_enabled_in_production():
+    with pytest.raises(ValidationError, match="restricted to the test environment"):
+        valid_production_settings(BROWSER_EXTRACTION_FIXTURE=True)

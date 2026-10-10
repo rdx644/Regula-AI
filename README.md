@@ -40,7 +40,7 @@ The logical application uses a Next.js workspace, a FastAPI service and a backgr
 
 | Layer | Technology |
 | --- | --- |
-| Web workspace | Next.js App Router, React, TypeScript, Tailwind CSS |
+| Web workspace | Next.js App Router, React, TypeScript, Tailwind CSS, Three.js |
 | API | Python 3.12, FastAPI, Pydantic, SQLAlchemy |
 | Database | PostgreSQL 16, pgvector, Alembic migrations |
 | Jobs and workflows | Redis, asynchronous workers, LangGraph workflows |
@@ -59,6 +59,20 @@ The logical application uses a Next.js workspace, a FastAPI service and a backgr
 6. Record remediation decisions and validate completion against current evidence.
 
 The [synthetic demo guide](docs/DEMO_AND_SUBMISSION.md) makes the tested path reproducible and identifies fixture-backed steps. Human review remains part of the workflow.
+
+## Workspace experience
+
+- **Overview**: compliance posture, traceability and an attention queue based on recorded workspace data.
+- **Regulatory library**: private source upload, parsing, source download and background-job progress. The upload limit comes from the API (10 MB on the free Render profile).
+- **Control library**: propose and approve controls, record manual mappings, upload and inspect evidence, and save reviewed tests.
+- **Compliance matrix**: search clauses and controls, inspect source citations, record applicability, approve mappings and assess deterministic gaps.
+- **Gap & remediation**: filter findings, propose a manual action plan, assign an owner and advance reviewed plans. Completion requires current evidence and a passing post-remediation test.
+
+After signing in, create a named workspace or select **Load demo scenario** to use the synthetic Basel III dataset. New demo obligations include applicability and synthetic source pages. For older demo records marked `approved / uncertain`, open **Review source**, choose **Reopen obligation review**, and explicitly approve the applicability before assessing gaps. Reloading the demo repairs missing synthetic source pages without changing previous decisions. Organization changes clear the previous view and cancel obsolete requests. Completed jobs refresh the relevant results automatically.
+
+The entry page uses locally served Manrope/Newsreader typography and a short, lazily loaded Three.js compliance-chain animation. Reduced-motion and WebGL fallback paths render a static diagram; hidden or finished animations stop rendering. The homepage uses a text wordmark without the former letter icon.
+
+**Free demo behavior:** model execution remains disabled. Source parsing, manual reviews and deterministic gap assessment work without paid AI. Assisted actions display as unavailable, and uploads parse without automatically starting extraction. Live extraction requires separate execution and spending approval. Browser verification uses an explicitly disclosed extraction fixture restricted to the test environment.
 
 ## Quick start
 
@@ -108,6 +122,8 @@ From the repository root:
 ```powershell
 cd frontend
 npm ci
+$env:NEXT_PUBLIC_API_URL = "/api"
+$env:API_PROXY_ORIGIN = "http://localhost:8000"
 npm run dev
 ```
 
@@ -120,7 +136,7 @@ The [hackathon blueprint](render.hackathon.yaml) defines free web, API, PostgreS
 1. Open [Create a Render Blueprint](https://dashboard.render.com/blueprint/new?repo=https://github.com/rdx644/Regula-AI), connect the repository and branch `main`, then set the blueprint path to `render.hackathon.yaml`.
 2. Confirm every listed service uses the **Free** plan. This blueprint has no separate paid worker and does not require S3.
 3. Select **Deploy Blueprint**. Render generates application secrets and links the API, frontend, database and Redis settings automatically.
-4. Open the assigned frontend URL. Verify HTTP 200 from `/api/health/live` and `/api/health` through that hostname. Readiness checks PostgreSQL, Redis and the embedded worker. No Render service is currently confirmed deployed; complete these checks after deployment.
+4. Open the assigned frontend URL. Verify HTTP 200 from `/api/health/live` and `/api/health` through that hostname. Readiness checks PostgreSQL, Redis and the embedded worker. The web service has been reachable, but API readiness was still failing during the latest local frontend review; complete these checks before sharing the demo.
 5. Create a synthetic account and use synthetic documents. Re-upload if a service restart clears local uploads.
 
 Free web services sleep, free PostgreSQL expires after 30 days without managed backups, and free Key Value data can be lost on restart. Web/API filesystems are ephemeral. This profile is for a short synthetic demo. See [Render free service limits](https://render.com/docs/free) and the [complete Render guide](docs/RENDER_DEPLOYMENT.md). The separate S3-backed preview uses paid compute and requires an owner-provided bucket.
@@ -159,8 +175,8 @@ Before browser verification, install Chromium with `npx playwright install chrom
 
 | Evidence | Observed result |
 | --- | --- |
-| Local backend suite | 104 passing tests, including PostgreSQL/Redis authorization and worker checks (recorded 2026-10-10) |
-| Automated browser suite | Five passing tests; axe, keyboard and narrow-screen checks on covered pages (recorded 2026-10-10) |
+| Local backend suite | 110 passing tests, including PostgreSQL/Redis authorization, worker and frontend capability checks (recorded 2026-10-10) |
+| Automated browser suite | Five passing tests; axe, keyboard and narrow-screen checks on covered pages. Manual axe checks also pass on all five signed-in views (recorded 2026-10-10) |
 | Database migrations | Head `f5a6b7c8d9e0`; fresh migrations and drift checks pass |
 | Frontend | Lint, type checking and production build pass (recorded 2026-10-10) |
 | GitHub CI | Main CI and Render Blueprint validation passed at source revision `9e0ca67`; see the workflow badges above for current status |
@@ -169,7 +185,7 @@ Before browser verification, install Chromium with `npx playwright install chrom
 | Architecture diagram | Local validation, delivery, artifact and browser gates pass; light/dark visual review completed. These checks do not verify a live deployment. |
 | Real model evaluation | Not run: zero predictions; ten golden inputs await budget and label review |
 
-[Local verification evidence](docs/evidence/verification.json) records the earlier engineering audit and its limitations. These results establish the covered behavior, not production capacity, comprehensive penetration testing or regulatory model reliability. Current badges show the latest workflow state; the run links above preserve the observed source-revision evidence.
+[Frontend redesign verification](docs/evidence/frontend-redesign.json) records the latest workflow and visual checks. [Local verification evidence](docs/evidence/verification.json) records the earlier engineering audit and its limitations. These results establish the covered behavior, not production capacity, comprehensive penetration testing or regulatory model reliability. Current badges show the latest workflow state; the run links above preserve the observed source-revision evidence.
 
 ## Repository layout
 

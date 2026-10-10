@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     # AI & Services (optional)
     OPENAI_API_KEY: Optional[str] = None
     MODEL_EXECUTION_ENABLED: bool = False
+    # Advertise only the explicit local browser fixture; never enable real models.
+    BROWSER_EXTRACTION_FIXTURE: bool = False
     SESSION_COOKIE_SECURE: bool = False
     RUN_EMBEDDED_WORKER: bool = False
     WORKER_MAX_CONCURRENT: int = Field(default=5, ge=1, le=20)
@@ -79,6 +81,8 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def validate_deployed_configuration(self):
         environment = self.ENVIRONMENT.lower()
+        if self.BROWSER_EXTRACTION_FIXTURE and environment != "test":
+            raise ValueError("The browser extraction fixture is restricted to the test environment.")
         if environment in {"demo", "staging", "production"}:
             secret = self.SECRET_KEY.strip()
             if len(secret) < 32 or "change_me" in secret.lower():

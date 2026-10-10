@@ -160,3 +160,32 @@ def test_user_response_matches_persisted_user_fields():
 
     assert response.id == user_id
     assert response.is_active is True
+
+
+def test_capabilities_report_upload_limits_without_credentials(monkeypatch):
+    monkeypatch.setattr(auth.settings, "MODEL_EXECUTION_ENABLED", False)
+    monkeypatch.setattr(auth.settings, "BROWSER_EXTRACTION_FIXTURE", False)
+    monkeypatch.setattr(auth.settings, "MAX_UPLOAD_BYTES", 10 * 1024 * 1024)
+    monkeypatch.setattr(auth.settings, "STORAGE_BACKEND", "local")
+    result = auth.get_capabilities(current_user=SimpleNamespace(id=uuid4()))
+    assert result == {
+        "model_execution_enabled": False,
+        "synthetic_extraction_enabled": False,
+        "max_upload_bytes": 10 * 1024 * 1024,
+        "ephemeral_uploads": True,
+    }
+
+
+def test_capabilities_require_a_key_for_real_assistance(monkeypatch):
+    monkeypatch.setattr(auth.settings, "MODEL_EXECUTION_ENABLED", True)
+    monkeypatch.setattr(auth.settings, "OPENAI_API_KEY", None)
+    assert auth.get_capabilities(current_user=SimpleNamespace(id=uuid4()))["model_execution_enabled"] is False
+
+
+def test_capabilities_disclose_the_explicit_browser_fixture(monkeypatch):
+    monkeypatch.setattr(auth.settings, "MODEL_EXECUTION_ENABLED", False)
+    monkeypatch.setattr(auth.settings, "ENVIRONMENT", "test")
+    monkeypatch.setattr(auth.settings, "BROWSER_EXTRACTION_FIXTURE", True)
+    result = auth.get_capabilities(current_user=SimpleNamespace(id=uuid4()))
+    assert result["synthetic_extraction_enabled"] is True
+    assert result["model_execution_enabled"] is False
