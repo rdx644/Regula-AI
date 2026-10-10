@@ -13,9 +13,7 @@ services:
     dockerContext: ./backend
     # Free web services do not support preDeployCommand. This single-instance
     # preview migrates before serving. Production needs a separate migration job.
-    dockerCommand: >-
-      sh -c 'python -m alembic upgrade head && exec python -m uvicorn
-      app.main:app --host 0.0.0.0 --port ${PORT:-10000} --no-proxy-headers'
+    dockerCommand: python /app/start_render.py
     healthCheckPath: /api/health/live
     autoDeployTrigger: checksPass
     envVars:

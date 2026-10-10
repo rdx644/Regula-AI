@@ -7,6 +7,7 @@ RUN groupadd --gid 10001 regulaai && useradd --uid 10001 --gid regulaai --no-cre
 COPY app ./app
 COPY alembic ./alembic
 COPY alembic.ini .
+COPY start_render.py .
 USER regulaai
 EXPOSE 8000
 CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-proxy-headers"]
