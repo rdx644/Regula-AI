@@ -123,6 +123,8 @@ jobs:
           python -m pip install -r requirements-dev.txt
           python -m alembic upgrade head
       - run: npm ci
+      - name: API cold-start retry regression tests
+        run: npm run test:api
       - name: Lint
         run: npm run lint
       - name: Type check

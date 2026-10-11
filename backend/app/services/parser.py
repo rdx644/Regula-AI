@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 from uuid import UUID
 
-import fitz
+import pymupdf
 
 
 INJECTION_PATTERNS = [
@@ -62,12 +62,12 @@ class DocumentParser:
         self.chunk_overlap = chunk_overlap
 
     def parse_pdf(self, file_path: str) -> ParsedDocument:
-        doc = fitz.open(file_path)
-        return self._parse_pdf_document(doc)
+        with pymupdf.open(file_path) as doc:
+            return self._parse_pdf_document(doc)
 
     def parse_pdf_bytes(self, content: bytes) -> ParsedDocument:
-        doc = fitz.open(stream=content, filetype="pdf")
-        return self._parse_pdf_document(doc)
+        with pymupdf.open(stream=content, filetype="pdf") as doc:
+            return self._parse_pdf_document(doc)
 
     def _parse_pdf_document(self, doc) -> ParsedDocument:
         pages = []

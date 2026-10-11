@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import RegulationIntake from "./RegulationIntake";
 import ComplianceReview, { ReviewRow } from "./ComplianceReview";
@@ -11,8 +10,8 @@ import ScenarioWorkspace from "./ScenarioWorkspace";
 import InvestigationWorkspace from "./InvestigationWorkspace";
 import { api, ApiError, errorMessage } from "../lib/api";
 import { Capabilities, CapabilitiesContext } from "../lib/capabilities";
+import TraceScene from "./TraceScene";
 
-const TraceScene = dynamic(() => import("./TraceScene"), { ssr: false });
 const ORG_KEY = "regulaai.organization-id";
 type View = "overview" | "matrix" | "library" | "controls" | "gaps" | "changes" | "scenarios" | "investigation";
 type User = { id: string; full_name: string; email: string };
@@ -190,18 +189,18 @@ export default function Home() {
 
   if (!token || !user) return <main className="auth-shell">
     <section className="auth-brand">
-      <div className="brand-lockup">Regula<span className="brand-light">AI</span><span className="edition">COMPLIANCE / INTELLIGENCE</span></div>
+      <div className="auth-brand-head"><div className="brand-lockup">Regula<span className="brand-light">AI</span><span className="edition">COMPLIANCE / INTELLIGENCE</span></div><span className="brand-stamp" aria-hidden="true">SOURCE<br />TO ACTION ↗</span></div>
       <div className="auth-message">
         <p className="eyebrow">FROM REQUIREMENT TO RESOLUTION</p>
         <h1>Complex regulation.<br /><em>Clear decisions.</em></h1>
-        <p>A considered workspace for obligations, controls and evidence. Every decision keeps its source in sight.</p>
+        <p>Connect obligations, controls and evidence. Make every decision traceable to its source.</p>
         <TraceScene />
       </div>
       <div className="auth-footnote"><span className="status-dot" /> Source linked <span className="foot-divider">/</span> Human reviewed</div>
     </section>
     <section className="auth-panel">
       <div className="auth-card">
-        <p className="eyebrow">YOUR NEXT CLEAR STEP</p>
+        <div className="auth-card-top"><p className="eyebrow">YOUR NEXT CLEAR STEP</p><span className="auth-card-marker" aria-hidden="true">↗</span></div>
         <h2>{mode === "login" ? "Welcome back." : "Make room for clarity."}</h2>
         <p className="muted">{mode === "login" ? "Sign in to your compliance workspace." : "Create an account, then choose or create a workspace."}</p>
         <form className="auth-form" onSubmit={handleAuth} aria-busy={loading || restoring}>

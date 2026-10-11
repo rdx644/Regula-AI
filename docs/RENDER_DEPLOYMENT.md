@@ -34,6 +34,24 @@ The proxy preserves trailing slashes: `/api/users/` and `/api/organizations/` mu
 
 ### Signup/sign-in returns 500 or 502
 
+The free API instance can sleep independently of the frontend. On 2026-10-11,
+the homepage returned 200 while proxied health checks initially returned 502
+and direct API checks timed out. By 08:43:55 UTC both direct and proxied
+liveness/readiness returned 200; readiness reported PostgreSQL and Redis
+connected and the worker healthy. This recovery is consistent with a cold start,
+but Render Events are needed to distinguish sleep from a restart.
+
+The browser API helper retries GET requests on network failures and 502/503/504
+responses, with five attempts and a two-minute overall deadline. Retry delays
+are 5, 10, 20 and 30 seconds, and navigation/unmount cancellation stops the wait.
+Writes are not automatically replayed. Authentication failures and rate limits
+return immediately. Run `cd frontend; npm run test:api` to check this behavior.
+
+The PyMuPDF `fitz` deprecation warning does not establish a startup failure:
+the supplied deployment logs show application startup completed after it.
+The parser now uses `import pymupdf` and closes PDF documents after parsing.
+No dependency upgrade is required for the pinned PyMuPDF version.
+
 1. Check the web service's `/api/health/live` and `/api/health`. A working homepage alone does not establish that authentication is available.
 2. Open the API service's public URL from its Render Dashboard and check the same paths directly. Free services can need time to wake up. If direct liveness remains unavailable, inspect API **Logs** and **Events** for startup, migration, restart or memory errors.
 3. If direct API health works but the web proxy fails, confirm the web service's `API_PROXY_ORIGIN` exactly matches the API's HTTPS origin (no `/api` suffix). Save the setting and rebuild the web service, because rewrites are compiled at build time.

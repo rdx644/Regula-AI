@@ -131,11 +131,11 @@ def test_model_switch_prevents_client_construction(monkeypatch):
 
 
 def test_pdf_page_provenance_and_invalid_quote_rejected(monkeypatch):
-    import fitz
+    import pymupdf
     from app.services.parser import DocumentParser
     from app.agents import extraction
     from app.agents.schemas import ObligationExtraction, ObligationExtractionBatch
-    pdf = fitz.open()
+    pdf = pymupdf.open()
     pdf.new_page().insert_text((72, 72), 'Synthetic informational preamble.')
     pdf.new_page().insert_text((72, 72), 'The synthetic bank shall review capital daily.')
     parsed = DocumentParser().parse_pdf_bytes(pdf.tobytes())
