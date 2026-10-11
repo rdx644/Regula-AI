@@ -51,7 +51,9 @@ export default function Home() {
   const [view, setView] = useState<View>("overview");
   const [mode, setMode] = useState<"login" | "register">("login");
   const [loading, setLoading] = useState(false);
-  const [restoring, setRestoring] = useState(true);
+  const [connection, setConnection] = useState<"connecting" | "waking" | "ready" | "unavailable">("connecting");
+  const [connectionAttempt, setConnectionAttempt] = useState(0);
+  const restoring = connection === "connecting" || connection === "waking";
   const [workspaceLoading, setWorkspaceLoading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -70,12 +72,12 @@ export default function Home() {
     localStorage.removeItem(ORG_KEY);
   }, []);
 
-  const loadWorkspace = useCallback(async (accessToken: string, preferredOrg?: string) => {
+  const loadWorkspace = useCallback(async (accessToken: string, preferredOrg?: string, startupSignal?: AbortSignal) => {
     const currentRevision = ++revision.current;
     pending.current?.abort();
     const controller = new AbortController();
     pending.current = controller;
-    const options = { signal: controller.signal };
+    const options = { signal: startupSignal ? AbortSignal.any([controller.signal, startupSignal]) : controller.signal };
     setWorkspaceLoading(true);
     try {
       const [profile, orgs, features] = await Promise.all([
@@ -114,15 +116,32 @@ export default function Home() {
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
+    const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(120_000)]);
+    const slowTimer = setTimeout(() => { if (active) setConnection("waking"); }, 3_000);
     const timer = setTimeout(() => {
-      api<{ csrf_token: string }>("/auth/session", undefined, { signal: controller.signal })
-        .then(({ csrf_token }) => { if (active) return loadWorkspace(csrf_token); })
+      // A missing session alone does not prove that the database and worker
+      // are ready. Warm the service before allowing an authentication write.
+      api<{ status: string }>("/health", undefined, { signal })
+        .then(() => api<{ csrf_token: string }>("/auth/session", undefined, { signal }))
+        .then(({ csrf_token }) => { if (active) return loadWorkspace(csrf_token, undefined, signal); })
+        .then(() => { if (active) setConnection("ready"); })
         .catch(reason => {
-          if (active && !(reason instanceof ApiError && reason.status === 401)) setError(errorMessage(reason));
-        }).finally(() => { if (active) setRestoring(false); });
+          if (!active) return;
+          if (reason instanceof ApiError && reason.status === 401) {
+            setConnection("ready");
+          } else {
+            setConnection("unavailable");
+            setError(signal.aborted ? "The workspace is taking longer than expected to start. Please retry the connection." : errorMessage(reason));
+          }
+        }).finally(() => clearTimeout(slowTimer));
     }, 0);
-    return () => { active = false; clearTimeout(timer); controller.abort(); pending.current?.abort(); };
-  }, [loadWorkspace]);
+    return () => { active = false; clearTimeout(timer); clearTimeout(slowTimer); controller.abort(); pending.current?.abort(); };
+  }, [loadWorkspace, connectionAttempt]);
+
+  function retryConnection() {
+    setError(""); setConnection("connecting");
+    setConnectionAttempt(attempt => attempt + 1);
+  }
 
   const refresh = useCallback(() => loadWorkspace(token, organizationId), [loadWorkspace, token, organizationId]);
   const matchingRows = useMemo(() => matrix.filter(row =>
@@ -132,7 +151,9 @@ export default function Home() {
   const busy = loading || workspaceLoading;
 
   async function handleAuth(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setError(""); setNotice(""); setLoading(true);
+    event.preventDefault();
+    if (connection !== "ready" || loading) return;
+    setError(""); setNotice(""); setLoading(true);
     const form = new FormData(event.currentTarget);
     const email = String(form.get("email") ?? "").trim();
     const password = String(form.get("password") ?? "");
@@ -147,7 +168,10 @@ export default function Home() {
       });
       await loadWorkspace(result.csrf_token);
       setNotice("Signed in. Choose a workspace or start with the demo.");
-    } catch (reason) { setError(errorMessage(reason, "Could not sign in.")); }
+    } catch (reason) {
+      setError(errorMessage(reason, "Could not sign in."));
+      if (reason instanceof ApiError && [0, 502, 503, 504].includes(reason.status)) setConnection("unavailable");
+    }
     finally { setLoading(false); }
   }
 
@@ -203,13 +227,21 @@ export default function Home() {
         <div className="auth-card-top"><p className="eyebrow">YOUR NEXT CLEAR STEP</p><span className="auth-card-marker" aria-hidden="true">↗</span></div>
         <h2>{mode === "login" ? "Welcome back." : "Make room for clarity."}</h2>
         <p className="muted">{mode === "login" ? "Sign in to your compliance workspace." : "Create an account, then choose or create a workspace."}</p>
+        {restoring && <div className="connection-status" role="status" aria-live="polite">
+          <strong>{connection === "waking" ? "Your workspace is waking up." : "Connecting to your workspace…"}</strong>
+          <p>{connection === "waking" ? "The first visit after a break can take up to two minutes. We’ll reconnect automatically; you can fill in your details while you wait." : "Checking availability and restoring your session."}</p>
+        </div>}
+        {connection === "unavailable" && <div className="connection-status">
+          <p>The connection could not be completed. Retry to reconnect without reloading this page. Your entered details will stay here.</p>
+          <button type="button" className="button button-secondary" onClick={retryConnection}>Retry connection</button>
+        </div>}
         <form className="auth-form" onSubmit={handleAuth} aria-busy={loading || restoring}>
           {mode === "register" && <label>Full name<input name="full_name" autoComplete="name" required minLength={2} maxLength={128} placeholder="Alex Morgan" /></label>}
           <label>Work email<input name="email" type="email" autoComplete="email" required placeholder="you@company.com" /></label>
           <label>Password<input name="password" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} required minLength={6} placeholder="At least 6 characters" /></label>
           {error && <p className="form-error" role="alert">{error}</p>}
           {notice && <p className="intake-progress" role="status">{notice}</p>}
-          <button className="button button-primary button-wide" disabled={loading || restoring}>{loading ? "Signing in…" : restoring ? "Connecting…" : mode === "login" ? "Sign in" : "Create account"}<span aria-hidden="true">↗</span></button>
+          <button className="button button-primary button-wide" disabled={loading || connection !== "ready"}>{loading ? "Signing in…" : restoring ? "Connecting…" : connection === "unavailable" ? "Waiting for connection" : mode === "login" ? "Sign in" : "Create account"}<span aria-hidden="true">↗</span></button>
         </form>
         <p className="auth-switch">{mode === "login" ? "New to RegulaAI?" : "Already have an account?"}{" "}<button className="text-button" disabled={loading} onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); setNotice(""); }}>{mode === "login" ? "Create account" : "Sign in"}</button></p>
         <div className="auth-security"><strong>Built around accountability.</strong><p>Private workspaces. Source context. Human decisions.</p></div>

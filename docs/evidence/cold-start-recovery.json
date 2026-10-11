@@ -1,0 +1,38 @@
+{
+  "verified_on": "2026-10-12",
+  "base_revision": "e3b8256",
+  "scope": "Frontend cold-start recovery; no hosting plan or backend changes",
+  "live_observation_before_change": {
+    "homepage": 200,
+    "session_during_startup": 502,
+    "session_after_api_recovered": 401,
+    "direct_api_liveness_after_wait": 200
+  },
+  "local_checks": {
+    "api_regressions": { "passed": 10, "failed": 0 },
+    "eslint": "passed",
+    "typescript_no_emit": "passed",
+    "production_build": "passed",
+    "runtime_dependency_audit": { "vulnerabilities": 0 },
+    "git_diff_check": "passed"
+  },
+  "browser_verification": {
+    "tool": "Playwright CLI against the local production build with intercepted synthetic API responses",
+    "automatic_recovery": "Six transient gateway responses, including HTML HTTP 200, then healthy readiness and unauthenticated session; sign-in enabled automatically on the seventh health request",
+    "premature_authentication_writes": 0,
+    "outage": "Readiness deadline displays Retry connection and keeps authentication disabled",
+    "deadline_testing": "Browser startup deadline accelerated to eight seconds; full two-minute retry deadline separately verified with a controlled clock in API tests",
+    "form_preservation": "Email, password, and registration full name survive a connection retry",
+    "lost_login_response": "One login write returning 502; reconnect restores its resulting session without replaying credentials; session also restores on reload",
+    "mobile": "390px width, no horizontal overflow; outage screenshot visually reviewed",
+    "accessibility": "Zero axe WCAG 2 A/AA and WCAG 2.1 AA violations in waking, unavailable, and recovered registration states",
+    "automatic_recovery_runtime_errors": 0
+  },
+  "limits": [
+    "Browser fault scenarios use mocked API responses, not a forced restart of live services.",
+    "No real account was created and no model call was made.",
+    "The unchanged backend and complete existing browser workflow suite remain covered by GitHub CI; they were not rerun locally for this frontend-only fix.",
+    "Render free-service sleep still applies, including the delay before the frontend can return HTML.",
+    "Deployment of this source change has not been verified by this pre-push record."
+  ]
+}

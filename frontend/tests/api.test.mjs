@@ -31,13 +31,14 @@ test("a read recovers from gateway errors while preserving cookies and CSRF", as
   const client = loadApi(async (url, init) => {
     assert.equal(url, "/api/auth/session");
     assert.equal(init.credentials, "include");
+    assert.equal(init.cache, "no-store");
     assert.equal(init.headers.get("X-CSRF-Token"), "test-csrf");
     calls++;
     return calls < 3 ? new Response("Service waking up", { status: calls === 1 ? 502 : 504 }) : json({ csrf_token: "ready" });
   });
   assert.equal((await client.api("/auth/session", "test-csrf")).csrf_token, "ready");
   assert.equal(calls, 3);
-  assert.deepEqual(client.delays, [5_000, 10_000]);
+  assert.deepEqual(client.delays, [2_000, 4_000]);
 });
 
 test("network failures recover on a read", async () => {
@@ -50,12 +51,67 @@ test("network failures recover on a read", async () => {
   assert.equal(calls, 2);
 });
 
-test("continued gateway failure reaches a bounded retry limit", async () => {
+test("a slow cold start can recover after more than five gateway responses", async () => {
   let calls = 0;
-  const client = loadApi(async () => { calls++; return new Response("Unavailable", { status: 502 }); });
-  await assert.rejects(client.api("/health"), error => error instanceof client.ApiError && error.status === 502);
-  assert.equal(calls, 5);
-  assert.deepEqual(client.delays, [5_000, 10_000, 20_000, 30_000]);
+  const client = loadApi(async () => ++calls <= 6
+    ? new Response("Unavailable", { status: 502 }) : json({ status: "ok" }));
+  assert.equal((await client.api("/health")).status, "ok");
+  assert.equal(calls, 7);
+  assert.deepEqual(client.delays, [2_000, 4_000, 5_000, 5_000, 5_000, 5_000]);
+});
+
+test("continued gateway failures stop at the two-minute deadline", async () => {
+  let calls = 0;
+  let elapsed = 0;
+  const deadline = new AbortController();
+  const client = loadApi(async () => { calls++; return new Response("Unavailable", { status: 502 }); }, {
+    AbortSignal: {
+      any: AbortSignal.any.bind(AbortSignal),
+      timeout: duration => duration === 120_000 ? deadline.signal : new AbortController().signal,
+    },
+    setTimeout: (callback, delay) => {
+      elapsed += delay;
+      queueMicrotask(() => elapsed >= 120_000
+        ? deadline.abort(new DOMException("Deadline", "TimeoutError")) : callback());
+      return 1;
+    },
+  });
+  await assert.rejects(client.api("/health"), error => error instanceof client.ApiError && error.status === 0);
+  assert.equal(calls, 25);
+  assert.equal(elapsed, 121_000);
+});
+
+test("HTML hosting wake-up pages are retried even with HTTP 200", async () => {
+  let calls = 0;
+  const client = loadApi(async () => ++calls === 1
+    ? new Response("<html>Starting</html>", { headers: { "content-type": "text/html; charset=utf-8" } })
+    : json({ status: "ok" }));
+  assert.equal((await client.api("/health")).status, "ok");
+  assert.equal(calls, 2);
+});
+
+test("a hanging read is cancelled per attempt and then recovers", async () => {
+  let calls = 0;
+  const timeouts = [];
+  const attempt = new AbortController();
+  const client = loadApi(async (_url, init) => {
+    if (++calls > 1) return json({ status: "ok" });
+    return new Promise((_resolve, reject) => {
+      init.signal.addEventListener("abort", () => reject(init.signal.reason), { once: true });
+      queueMicrotask(() => attempt.abort(new DOMException("Read timed out", "TimeoutError")));
+    });
+  }, {
+    AbortSignal: {
+      any: AbortSignal.any.bind(AbortSignal),
+      timeout: duration => {
+        timeouts.push(duration);
+        return duration === 15_000 && calls === 0 ? attempt.signal : new AbortController().signal;
+      },
+    },
+  });
+  assert.equal((await client.api("/health")).status, "ok");
+  assert.deepEqual(timeouts, [120_000, 15_000, 15_000]);
+  assert.equal(calls, 2);
 });
 
 test("authorization, validation, and rate-limit failures return immediately", async () => {
@@ -70,14 +126,15 @@ test("authorization, validation, and rate-limit failures return immediately", as
 
 test("writes are never replayed, including network failures", async () => {
   for (const method of ["POST", "PUT", "PATCH", "DELETE"]) {
-    for (const failure of ["gateway", "network"]) {
+    for (const failure of ["gateway", "network", "html"]) {
       let calls = 0;
       const client = loadApi(async () => {
         calls++;
         if (failure === "network") throw new TypeError("Failed to fetch");
+        if (failure === "html") return new Response("<html>Starting</html>", { headers: { "content-type": "text/html" } });
         return new Response("Unavailable", { status: 503 });
       });
-      await assert.rejects(client.api("/organizations/", "csrf", { method }), error => error.status === (failure === "network" ? 0 : 503));
+      await assert.rejects(client.api("/organizations/", "csrf", { method }), error => error.status === (failure === "network" ? 0 : failure === "html" ? 200 : 503));
       assert.equal(calls, 1);
       assert.deepEqual(client.delays, []);
     }

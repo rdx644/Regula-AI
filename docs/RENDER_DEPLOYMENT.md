@@ -41,11 +41,30 @@ liveness/readiness returned 200; readiness reported PostgreSQL and Redis
 connected and the worker healthy. This recovery is consistent with a cold start,
 but Render Events are needed to distinguish sleep from a restart.
 
-The browser API helper retries GET requests on network failures and 502/503/504
-responses, with five attempts and a two-minute overall deadline. Retry delays
-are 5, 10, 20 and 30 seconds, and navigation/unmount cancellation stops the wait.
-Writes are not automatically replayed. Authentication failures and rate limits
-return immediately. Run `cd frontend; npm run test:api` to check this behavior.
+The browser checks `/api/health` before restoring a session or enabling the
+sign-in/create-account form. While the API wakes, the page explains the wait
+and allows users to enter their details. Startup has a two-minute overall
+deadline, including session and workspace reads. If it expires, **Retry
+connection** starts a fresh readiness/session check without reloading or
+clearing the form. A failed authentication connection also offers this recovery;
+reconnecting can restore a session whose login response was lost.
+
+The API helper retries GET requests on network failures, 502/503/504 responses,
+and successful HTML gateway wake-up pages. It uses the full two-minute read
+window, with 15-second per-attempt timeouts and delays of 2, 4, then at most
+5 seconds. The previous five-attempt limit could give up after only 65 seconds
+of immediate gateway errors. Reads bypass caches; navigation/unmount
+cancellation stops pending requests and backoff. Writes are never replayed,
+and authentication/validation failures and rate limits return immediately.
+Run `cd frontend; npm run test:api` for the regression checks.
+Local production-build browser checks and their simulation limits are recorded
+in [cold-start recovery evidence](evidence/cold-start-recovery.json).
+
+This recovery does not prevent Render from sleeping a free service. If the
+frontend itself is asleep, Render must serve the first HTML response before
+the application can show its startup status. An always-on service or a
+separately hosted static frontend requires an explicit hosting decision;
+neither free blueprint is upgraded by this fix.
 
 The PyMuPDF `fitz` deprecation warning does not establish a startup failure:
 the supplied deployment logs show application startup completed after it.

@@ -26,28 +26,30 @@ async function fetchApi(path: string, init: RequestInit): Promise<Response> {
   // Free API instances may return a gateway error while waking up. Only
   // replay reads: a failed write may already have reached the database.
   const retryable = (init.method ?? "GET").toUpperCase() === "GET";
-  const attempts = retryable ? 5 : 1;
   const deadline = AbortSignal.timeout(retryable ? 120_000 : 60_000);
   const signal = init.signal ? AbortSignal.any([init.signal, deadline]) : deadline;
-  for (let attempt = 0; attempt < attempts; attempt++) {
+  // Keep checking for the whole startup window. An attempt limit can expire
+  // much earlier when the gateway returns immediately while the API sleeps.
+  for (let attempt = 0; ; attempt++) {
     signal.throwIfAborted();
     let response: Response | undefined;
     try {
       response = await fetch(`${API_URL}${path}`, {
-        ...init, credentials: "include",
-        signal: AbortSignal.any([signal, AbortSignal.timeout(60_000)]),
+        ...init, credentials: "include", cache: "no-store",
+        signal: AbortSignal.any([signal, AbortSignal.timeout(retryable ? 15_000 : 60_000)]),
       });
     } catch (reason) {
-      if (signal.aborted || attempt === attempts - 1) throw reason;
+      if (signal.aborted || !retryable) throw reason;
     }
-    if (response && (![502, 503, 504].includes(response.status) || attempt === attempts - 1)) {
+    // Hosting gateways can also serve an HTML wake-up page with HTTP 200.
+    const wakingPage = response?.ok && response.headers.get("content-type")?.includes("text/html");
+    if (response && (!retryable || (![502, 503, 504].includes(response.status) && !wakingPage))) {
       return response;
     }
     // Release discarded gateway response bodies before the next request.
     await response?.body?.cancel();
-    await waitForRetry(Math.min(5_000 * 2 ** attempt, 30_000), signal);
+    await waitForRetry(Math.min(2_000 * 2 ** attempt, 5_000), signal);
   }
-  throw new Error("API retry limit reached");
 }
 
 export async function api<T>(path: string, token?: string, init: RequestInit = {}): Promise<T> {
