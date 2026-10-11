@@ -2,6 +2,8 @@
 
 The Next.js App Router frontend provides account registration and sign-in, an organization-scoped compliance overview, and a traceability matrix linking obligations, controls, evidence, tests, gaps, and remediation.
 
+The interface uses a neo-brutalist theme: warm paper, yellow/lilac/mint/coral accents, heavy Manrope headings, square ink borders and offset shadows. Shared tokens in `src/app/globals.css` style authentication and all eight workspace views. The sign-in trace board uses HTML/SVG and needs no WebGL or animation. Keyboard focus, reduced-motion preferences, narrow-screen navigation and contained table scrolling remain supported. See [design and verification](../docs/FRONTEND_DESIGN.md).
+
 ## Run locally
 
 1. Start the repository's local PostgreSQL/pgvector and Redis services with `docker compose up -d postgres redis` from the project root. Configure `backend/.env` from `backend/.env.example` with the local database URL and a unique development `SECRET_KEY`.

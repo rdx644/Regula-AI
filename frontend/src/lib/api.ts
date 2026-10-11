@@ -7,6 +7,49 @@ export class ApiError extends Error {
   }
 }
 
+function waitForRetry(delay: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    signal.throwIfAborted();
+    const timer = setTimeout(() => {
+      signal.removeEventListener("abort", abort);
+      resolve();
+    }, delay);
+    function abort() {
+      clearTimeout(timer);
+      reject(signal.reason);
+    }
+    signal.addEventListener("abort", abort, { once: true });
+  });
+}
+
+async function fetchApi(path: string, init: RequestInit): Promise<Response> {
+  // Free API instances may return a gateway error while waking up. Only
+  // replay reads: a failed write may already have reached the database.
+  const retryable = (init.method ?? "GET").toUpperCase() === "GET";
+  const attempts = retryable ? 5 : 1;
+  const deadline = AbortSignal.timeout(retryable ? 120_000 : 60_000);
+  const signal = init.signal ? AbortSignal.any([init.signal, deadline]) : deadline;
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    signal.throwIfAborted();
+    let response: Response | undefined;
+    try {
+      response = await fetch(`${API_URL}${path}`, {
+        ...init, credentials: "include",
+        signal: AbortSignal.any([signal, AbortSignal.timeout(60_000)]),
+      });
+    } catch (reason) {
+      if (signal.aborted || attempt === attempts - 1) throw reason;
+    }
+    if (response && (![502, 503, 504].includes(response.status) || attempt === attempts - 1)) {
+      return response;
+    }
+    // Release discarded gateway response bodies before the next request.
+    await response?.body?.cancel();
+    await waitForRetry(Math.min(5_000 * 2 ** attempt, 30_000), signal);
+  }
+  throw new Error("API retry limit reached");
+}
+
 export async function api<T>(path: string, token?: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
   if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) {
@@ -15,9 +58,7 @@ export async function api<T>(path: string, token?: string, init: RequestInit = {
   if (token) headers.set("X-CSRF-Token", token);
   let response: Response;
   try {
-    response = await fetch(`${API_URL}${path}`, {
-      ...init, headers, credentials: "include", signal: init.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(60_000)]) : AbortSignal.timeout(60_000),
-    });
+    response = await fetchApi(path, { ...init, headers });
   } catch (reason) {
     if (init.signal?.aborted) throw reason;
     throw new ApiError("The workspace could not be reached. It may be waking up; try again shortly.", 0);

@@ -1,0 +1,234 @@
+﻿{
+    "date":  "2026-10-11",
+    "base_commit":  "6f0944671d10bb0cf2cae9430a931d033f1233d3",
+    "status":  "locally_verified_deployment_pending",
+    "design":  "neo-brutalism",
+    "lint":  "passed",
+    "production_build_including_typescript":  "passed",
+    "browser_review":  {
+                           "checks":  [
+                                          {
+                                              "view":  "Overview",
+                                              "viewport":  1440,
+                                              "scrollWidth":  1440,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "Regulatory library",
+                                              "viewport":  1440,
+                                              "scrollWidth":  1440,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "Control library",
+                                              "viewport":  1440,
+                                              "scrollWidth":  1440,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "Compliance matrix",
+                                              "viewport":  1440,
+                                              "scrollWidth":  1440,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "Gap \u0026 remediation",
+                                              "viewport":  1440,
+                                              "scrollWidth":  1440,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "Version comparison",
+                                              "viewport":  1440,
+                                              "scrollWidth":  1440,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "What-if scenarios",
+                                              "viewport":  1440,
+                                              "scrollWidth":  1440,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "Investigation \u0026 audit",
+                                              "viewport":  1440,
+                                              "scrollWidth":  1440,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "Overview",
+                                              "viewport":  390,
+                                              "scrollWidth":  390,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "Regulatory library",
+                                              "viewport":  390,
+                                              "scrollWidth":  390,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "Control library",
+                                              "viewport":  390,
+                                              "scrollWidth":  390,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "Compliance matrix",
+                                              "viewport":  390,
+                                              "scrollWidth":  390,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "Gap \u0026 remediation",
+                                              "viewport":  390,
+                                              "scrollWidth":  390,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "Version comparison",
+                                              "viewport":  390,
+                                              "scrollWidth":  390,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "What-if scenarios",
+                                              "viewport":  390,
+                                              "scrollWidth":  390,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "Investigation \u0026 audit",
+                                              "viewport":  390,
+                                              "scrollWidth":  390,
+                                              "violations":  [
+
+                                                             ],
+                                              "alerts":  [
+
+                                                         ]
+                                          },
+                                          {
+                                              "view":  "Sign in",
+                                              "viewport":  1440,
+                                              "scrollWidth":  1440,
+                                              "violations":  [
+
+                                                             ]
+                                          },
+                                          {
+                                              "view":  "Sign in",
+                                              "viewport":  390,
+                                              "scrollWidth":  390,
+                                              "violations":  [
+
+                                                             ]
+                                          },
+                                          {
+                                              "view":  "Sign in",
+                                              "viewport":  320,
+                                              "scrollWidth":  320,
+                                              "violations":  [
+
+                                                             ]
+                                          },
+                                          {
+                                              "view":  "Create account",
+                                              "viewport":  320,
+                                              "scrollWidth":  320,
+                                              "violations":  [
+
+                                                             ]
+                                          },
+                                          {
+                                              "view":  "Keyboard focus",
+                                              "focused":  true,
+                                              "outline":  "solid"
+                                          },
+                                          {
+                                              "view":  "Reduced motion",
+                                              "transition":  "0s"
+                                          }
+                                      ],
+                           "errors":  [
+
+                                      ],
+                           "fixtureScope":  "Isolated synthetic browser routes; no live authentication or backend persistence tested."
+                       },
+    "backend_scope":  "No new backend changes for styling; full integration suite not rerun."
+}
