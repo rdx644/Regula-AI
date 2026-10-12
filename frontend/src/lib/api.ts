@@ -81,6 +81,24 @@ export async function api<T>(path: string, token?: string, init: RequestInit = {
   return body as T;
 }
 
+export async function connectSession(signal: AbortSignal): Promise<{ csrf_token: string } | null> {
+  const controller = new AbortController();
+  const options = { signal: AbortSignal.any([signal, controller.signal]) };
+  try {
+    const [, session] = await Promise.all([
+      api<{ status: string }>("/health", undefined, options),
+      api<{ csrf_token: string }>("/auth/session", undefined, options).catch(reason => {
+        if (reason instanceof ApiError && reason.status === 401) return null;
+        throw reason;
+      }),
+    ]);
+    return session;
+  } finally {
+    // Stop the other read if either fails; do not leave a retry loop running.
+    controller.abort();
+  }
+}
+
 export function errorMessage(reason: unknown, fallback = "Could not complete this action.") {
   return reason instanceof Error ? reason.message : fallback;
 }

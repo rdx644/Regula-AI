@@ -4,17 +4,8 @@ from typing import Any, Dict
 from uuid import UUID
 
 from app.services.queue import Job, JobHandler, JobQueue
-from app.services.parser import parse_document_bytes, DocumentParser
-from app.agents.extraction import run_obligation_extraction
-from app.agents.control_extraction import run_control_extraction
-from app.agents.mapping import run_mapping
-from app.agents.evidence import run_evidence_validation
-from app.agents.testing import run_control_testing
-from app.agents.gap import run_gap_identification
-from app.agents.remediation import run_remediation
-from app.agents.change import run_change_detection, run_impact_analysis
-from app.agents.simulation import run_simulation_analysis
-from app.agents.intelligence import run_cross_regulation_analysis, run_contradiction_detection
+# Register ORM relationships without importing the AI workflows at startup.
+from app.db import base as registered_models  # noqa: F401
 from app.db.session import SessionLocal
 from app.models.regulation import DocumentStatus, RegulatoryDocument, RegulatoryVersion
 from app.services.storage import get_private_storage
@@ -35,6 +26,8 @@ def _get_organization_record(db, model, record_id: UUID, organization_id: UUID):
 
 class RegulationProcessHandler(JobHandler):
     async def handle(self, job: Job) -> Dict[str, Any]:
+        from app.services.parser import parse_document_bytes, DocumentParser
+
         db = SessionLocal()
         try:
             version_id = UUID(job.payload["version_id"])
@@ -94,6 +87,9 @@ class RegulationProcessHandler(JobHandler):
 
 class ObligationExtractionHandler(JobHandler):
     async def handle(self, job: Job) -> Dict[str, Any]:
+        from app.services.parser import DocumentParser
+        from app.agents.extraction import run_obligation_extraction
+
         db = SessionLocal()
         try:
             version_id = UUID(job.payload["version_id"])
@@ -163,6 +159,8 @@ class ObligationExtractionHandler(JobHandler):
 
 class PolicyProcessHandler(JobHandler):
     async def handle(self, job: Job) -> Dict[str, Any]:
+        from app.services.parser import parse_document_bytes
+
         db = SessionLocal()
         try:
             policy_id = UUID(job.payload["policy_id"])
@@ -208,6 +206,9 @@ class PolicyProcessHandler(JobHandler):
 
 class ControlExtractionHandler(JobHandler):
     async def handle(self, job: Job) -> Dict[str, Any]:
+        from app.services.parser import DocumentParser
+        from app.agents.control_extraction import run_control_extraction
+
         db = SessionLocal()
         try:
             policy_id = UUID(job.payload["policy_id"])
@@ -274,6 +275,8 @@ class ControlExtractionHandler(JobHandler):
 
 class MappingHandler(JobHandler):
     async def handle(self, job: Job) -> Dict[str, Any]:
+        from app.agents.mapping import run_mapping
+
         db = SessionLocal()
         try:
             obligation_id = UUID(job.payload["obligation_id"])
@@ -306,6 +309,8 @@ class MappingHandler(JobHandler):
 
 class EvidenceValidationHandler(JobHandler):
     async def handle(self, job: Job) -> Dict[str, Any]:
+        from app.agents.evidence import run_evidence_validation
+
         db = SessionLocal()
         try:
             evidence_id = UUID(job.payload["evidence_id"])
@@ -341,6 +346,8 @@ class EvidenceValidationHandler(JobHandler):
 
 class ControlTestingHandler(JobHandler):
     async def handle(self, job: Job) -> Dict[str, Any]:
+        from app.agents.testing import run_control_testing
+
         db = SessionLocal()
         try:
             control_id = UUID(job.payload["control_id"])
@@ -373,6 +380,8 @@ class ControlTestingHandler(JobHandler):
 
 class GapIdentificationHandler(JobHandler):
     async def handle(self, job: Job) -> Dict[str, Any]:
+        from app.agents.gap import run_gap_identification
+
         db = SessionLocal()
         try:
             obligation_id = UUID(job.payload["obligation_id"])
@@ -406,6 +415,8 @@ class GapIdentificationHandler(JobHandler):
 
 class RemediationHandler(JobHandler):
     async def handle(self, job: Job) -> Dict[str, Any]:
+        from app.agents.remediation import run_remediation
+
         db = SessionLocal()
         try:
             gap_id = UUID(job.payload["gap_id"])
@@ -440,6 +451,8 @@ class RemediationHandler(JobHandler):
 
 class ChangeDetectionHandler(JobHandler):
     async def handle(self, job: Job) -> Dict[str, Any]:
+        from app.agents.change import run_change_detection
+
         db = SessionLocal()
         try:
             document_id = UUID(job.payload["document_id"])
@@ -483,6 +496,8 @@ class ChangeDetectionHandler(JobHandler):
 
 class ImpactAnalysisHandler(JobHandler):
     async def handle(self, job: Job) -> Dict[str, Any]:
+        from app.agents.change import run_impact_analysis
+
         db = SessionLocal()
         try:
             change_id = UUID(job.payload["change_id"])
@@ -515,6 +530,8 @@ class ImpactAnalysisHandler(JobHandler):
 
 class SimulationHandler(JobHandler):
     async def handle(self, job: Job) -> Dict[str, Any]:
+        from app.agents.simulation import run_simulation_analysis
+
         db = SessionLocal()
         try:
             simulation = None
@@ -554,6 +571,8 @@ class SimulationHandler(JobHandler):
 
 class CrossRegulationHandler(JobHandler):
     async def handle(self, job: Job) -> Dict[str, Any]:
+        from app.agents.intelligence import run_cross_regulation_analysis
+
         db = SessionLocal()
         try:
             organization_id = UUID(job.organization_id)
@@ -580,6 +599,8 @@ class CrossRegulationHandler(JobHandler):
 
 class ContradictionHandler(JobHandler):
     async def handle(self, job: Job) -> Dict[str, Any]:
+        from app.agents.intelligence import run_contradiction_detection
+
         db = SessionLocal()
         try:
             organization_id = UUID(job.organization_id)
