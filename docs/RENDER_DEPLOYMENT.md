@@ -41,8 +41,10 @@ liveness/readiness returned 200; readiness reported PostgreSQL and Redis
 connected and the worker healthy. This recovery is consistent with a cold start,
 but Render Events are needed to distinguish sleep from a restart.
 
-The browser checks `/api/health` before restoring a session or enabling the
-sign-in/create-account form. While the API wakes, the page explains the wait
+The browser checks `/api/health` and `/api/auth/session` concurrently, requiring
+both checks to settle successfully (or a session-only 401) before enabling the
+sign-in/create-account form. This removes a serial network round trip while
+preserving the readiness gate. While the API wakes, the page explains the wait
 and allows users to enter their details. Startup has a two-minute overall
 deadline, including session and workspace reads. If it expires, **Retry
 connection** starts a fresh readiness/session check without reloading or
@@ -65,6 +67,43 @@ frontend itself is asleep, Render must serve the first HTML response before
 the application can show its startup status. An always-on service or a
 separately hosted static frontend requires an explicit hosting decision;
 neither free blueprint is upgraded by this fix.
+
+### Loading performance improvements (2026-10-12)
+
+The embedded worker registers all fourteen handlers without importing their AI
+workflows or PDF parser. Each handler loads its dependencies when its job runs;
+ORM models are still registered explicitly at startup. This moves the one-time
+dependency cost to the first relevant job, with no change to model execution
+permissions, migrations, queue behavior or readiness requirements.
+
+The frontend downloads the seven secondary workspace screens on demand, with an
+accessible loading indicator. Readiness and session requests start together;
+failure or cancellation stops the sibling request. Authentication writes still
+wait for readiness and are never automatically replayed.
+
+Local production-build comparison against `65db52a`:
+
+| Measurement | Before | After |
+| --- | --- | --- |
+| Homepage-referenced JavaScript, uncompressed (including legacy script) | 646,454 bytes | about 604 KB |
+| Same scripts, individually gzip-compressed | 193,410 bytes | about 186 KB |
+| API + worker registry imports, median of 3 fresh Python processes | 2.47 s | 1.18 s |
+| Python modules loaded by those imports | 1,959 | 836 |
+
+These are local Windows measurements, not Render cold-start benchmarks. Live
+inspection before the change showed first content at about 1.26 seconds while
+the API returned repeated 502s. Direct API liveness timed out at 45 seconds;
+later direct and proxied readiness recovered with database, Redis and worker
+healthy. Render Logs/Events are needed to distinguish idle sleep from restart.
+
+Verification covers API retry/concurrency tests, backend import/parser/worker
+and security unit tests, lint, TypeScript and production build. Local browser
+checks use intercepted synthetic API responses: gateway/HTML recovery, retained
+form input, restored sessions, all seven deferred screens, and a 390px mobile
+view with no horizontal overflow or axe WCAG A/AA violations on the inspected
+investigation view. Full database/Redis integration and deployment checks remain
+required in CI and after release. The hosting plans remain free; these code
+changes cannot remove Render's platform sleep or the initial wait for HTML.
 
 The PyMuPDF `fitz` deprecation warning does not establish a startup failure:
 the supplied deployment logs show application startup completed after it.

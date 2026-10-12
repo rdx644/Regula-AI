@@ -14,7 +14,7 @@ function loadApi(fetch, overrides = {}) {
   const exports = {};
   const delays = [];
   const context = vm.createContext({
-    exports, process: { env: {} }, Headers, FormData, AbortSignal, fetch,
+    exports, process: { env: {} }, Headers, FormData, AbortSignal, AbortController, fetch,
     setTimeout: (callback, delay) => { delays.push(delay); queueMicrotask(callback); return 1; },
     clearTimeout: () => {}, ...overrides,
   });
@@ -165,4 +165,63 @@ test("the overall deadline stops retry backoff", async () => {
   await assert.rejects(client.api("/auth/session"), error => error instanceof client.ApiError && error.status === 0);
   assert.equal(calls, 1);
   assert.equal(timeouts[0], 120_000);
+});
+
+test("readiness and session start concurrently, but a missing session cannot bypass readiness", async () => {
+  const calls = [];
+  let ready;
+  const health = new Promise(resolve => { ready = resolve; });
+  const client = loadApi(async url => {
+    calls.push(url);
+    return url.endsWith("/health") ? health : json({ detail: "Not authenticated" }, 401);
+  });
+  let connected = false;
+  const connection = client.connectSession(new AbortController().signal).then(result => {
+    connected = true;
+    return result;
+  });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(calls, ["/api/health", "/api/auth/session"]);
+  assert.equal(connected, false);
+  ready(json({ status: "ok" }));
+  assert.equal(await connection, null);
+});
+
+test("concurrent connection preserves an existing session", async () => {
+  const client = loadApi(async url => json(url.endsWith("/health")
+    ? { status: "ok" } : { csrf_token: "existing-csrf" }));
+  assert.equal((await client.connectSession(new AbortController().signal)).csrf_token, "existing-csrf");
+});
+
+test("only the session endpoint's 401 is treated as a signed-out visitor", async () => {
+  const client = loadApi(async () => json({ detail: "Denied" }, 401));
+  await assert.rejects(client.connectSession(new AbortController().signal), error => error.status === 401);
+  const forbidden = loadApi(async url => url.endsWith("/health")
+    ? json({ status: "ok" }) : json({ detail: "Forbidden" }, 403));
+  await assert.rejects(forbidden.connectSession(new AbortController().signal), error => error.status === 403);
+});
+
+test("a failed readiness check cancels the sibling session read", async () => {
+  let sessionSignal;
+  const client = loadApi(async (url, init) => {
+    if (url.endsWith("/health")) return json({ detail: "Rate limited" }, 429);
+    sessionSignal = init.signal;
+    return new Promise((_resolve, reject) => init.signal.addEventListener("abort", () => reject(init.signal.reason), { once: true }));
+  });
+  await assert.rejects(client.connectSession(new AbortController().signal), error => error.status === 429);
+  assert.equal(sessionSignal.aborted, true);
+});
+
+test("a cancelled connection stops both reads", async () => {
+  const signals = [];
+  const client = loadApi(async (_url, init) => {
+    signals.push(init.signal);
+    return new Promise((_resolve, reject) => init.signal.addEventListener("abort", () => reject(init.signal.reason), { once: true }));
+  });
+  const controller = new AbortController();
+  const connection = client.connectSession(controller.signal);
+  controller.abort();
+  await assert.rejects(connection, error => error.name === "AbortError");
+  assert.equal(signals.length, 2);
+  assert.ok(signals.every(signal => signal.aborted));
 });

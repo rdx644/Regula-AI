@@ -1,16 +1,22 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import RegulationIntake from "./RegulationIntake";
-import ComplianceReview, { ReviewRow } from "./ComplianceReview";
-import ControlWorkspace from "./ControlWorkspace";
-import GapWorkspace from "./GapWorkspace";
-import ChangeWorkspace from "./ChangeWorkspace";
-import ScenarioWorkspace from "./ScenarioWorkspace";
-import InvestigationWorkspace from "./InvestigationWorkspace";
-import { api, ApiError, errorMessage } from "../lib/api";
+import dynamic from "next/dynamic";
+import type { ReviewRow } from "./ComplianceReview";
+import { api, ApiError, connectSession, errorMessage } from "../lib/api";
 import { Capabilities, CapabilitiesContext } from "../lib/capabilities";
 import TraceScene from "./TraceScene";
+
+function WorkspaceLoading() {
+  return <div className="panel-card" role="status">Loading workspace view…</div>;
+}
+const RegulationIntake = dynamic(() => import("./RegulationIntake"), { loading: WorkspaceLoading });
+const ComplianceReview = dynamic(() => import("./ComplianceReview"), { loading: WorkspaceLoading });
+const ControlWorkspace = dynamic(() => import("./ControlWorkspace"), { loading: WorkspaceLoading });
+const GapWorkspace = dynamic(() => import("./GapWorkspace"), { loading: WorkspaceLoading });
+const ChangeWorkspace = dynamic(() => import("./ChangeWorkspace"), { loading: WorkspaceLoading });
+const ScenarioWorkspace = dynamic(() => import("./ScenarioWorkspace"), { loading: WorkspaceLoading });
+const InvestigationWorkspace = dynamic(() => import("./InvestigationWorkspace"), { loading: WorkspaceLoading });
 
 const ORG_KEY = "regulaai.organization-id";
 type View = "overview" | "matrix" | "library" | "controls" | "gaps" | "changes" | "scenarios" | "investigation";
@@ -119,20 +125,20 @@ export default function Home() {
     const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(120_000)]);
     const slowTimer = setTimeout(() => { if (active) setConnection("waking"); }, 3_000);
     const timer = setTimeout(() => {
-      // A missing session alone does not prove that the database and worker
-      // are ready. Warm the service before allowing an authentication write.
-      api<{ status: string }>("/health", undefined, { signal })
-        .then(() => api<{ csrf_token: string }>("/auth/session", undefined, { signal }))
-        .then(({ csrf_token }) => { if (active) return loadWorkspace(csrf_token, undefined, signal); })
+      // Check readiness and the session together, but require readiness even
+      // for a signed-out visitor before allowing an authentication write.
+      connectSession(signal)
+        .then(session => {
+          if (active && session) return loadWorkspace(session.csrf_token, undefined, signal).catch(reason => {
+            // A session may expire between restoration and the workspace reads.
+            if (!(reason instanceof ApiError && reason.status === 401)) throw reason;
+          });
+        })
         .then(() => { if (active) setConnection("ready"); })
         .catch(reason => {
           if (!active) return;
-          if (reason instanceof ApiError && reason.status === 401) {
-            setConnection("ready");
-          } else {
-            setConnection("unavailable");
-            setError(signal.aborted ? "The workspace is taking longer than expected to start. Please retry the connection." : errorMessage(reason));
-          }
+          setConnection("unavailable");
+          setError(signal.aborted ? "The workspace is taking longer than expected to start. Please retry the connection." : errorMessage(reason));
         }).finally(() => clearTimeout(slowTimer));
     }, 0);
     return () => { active = false; clearTimeout(timer); clearTimeout(slowTimer); controller.abort(); pending.current?.abort(); };
